@@ -21,10 +21,10 @@ var paths = [];
 var adjList = [];
 
 var squares = [
-    new Square(1, 100, 100, 50, 'red', -1, -1),
-    new Square(2, 300, 100, 50, 'green', -1, -1),
-    new Square(3, 100, 300, 50, 'blue', -1, -1),
-    new Square(4, 300, 300, 50, 'yellow', -1, -1)
+    new Square(0, 100, 100, 50, 'red', -1, -1),
+    new Square(1, 300, 100, 50, 'green', -1, -1),
+    new Square(2, 100, 300, 50, 'blue', -1, -1),
+    new Square(3, 300, 300, 50, 'yellow', -1, -1)
 ];
 
 var arrows = [];
@@ -257,7 +257,7 @@ canvas.addEventListener('mousedown', function(e){
     }
 
     if (drawingSquare){
-        var newSquare = new Square(squares.length + 1 , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
+        var newSquare = new Square(squares.length , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
         squares.push(newSquare);
         drawCanvas();
         exitTool();
@@ -371,6 +371,7 @@ function printAllPathsUtil(u,d,isVisited,localPathList)
     isVisited[u] = false;
 }
 
+// Initalisation de la liste d'adjacence (pour chaque carré, on crée un tableau vide qui contiendra les carrés auxquels il est connecté)
 function initAdjList() {
     for (let i = 0; i < squares.length; i++) {
         adjList[i] = [];
@@ -378,24 +379,27 @@ function initAdjList() {
     //console.log("adjList : ", adjList);
 }
 
+// Ajouter une connexion entre deux carrés
 function addEdge(start, end) {
     adjList[start].push(end);
 }
 
+// Afficher tous les chemins possibles entre deux carrés
 function renderPaths() {
     initAdjList();
     for (let i = 0; i < squares.length; i++) {
         for (let j = 0; j < squares[i].output; j++) {
-            addEdge(squares[i].id - 1, squares[i].connections[j].id - 1);
+            addEdge(squares[i].id, squares[i].connections[j].id);
         }
     }
 
-    printAllPaths(squares[0].id - 1, squares[squares.length - 1].id - 1);
+    printAllPaths(squares[0].id, squares[squares.length - 1].id);
 }
 
+// Reaffecter les id des carrés
 function reassignIds() {
     for (let i = 0; i < squares.length; i++) {
-        squares[i].id = i + 1;
+        squares[i].id = i;
     }
 }
 
