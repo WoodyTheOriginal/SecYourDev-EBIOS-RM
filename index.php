@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diagramme</title>
-    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
     <title>Diagramme</title>
 
     <?php //  include 'header.php' ; ?>
@@ -26,18 +26,35 @@
 
 <!-- TEST GRAPHIQUE -->
 
-
-    <div id='contextMenu'>
+    <div id="contextMenu">
+        <h3>Menu</h3>
         <select name="typeCarre" id="selectCarre">
-            <option value="cat1">Catégorie 1</option>
-            <option value="cat2">Catégorie 2</option>
-            <option value="cat3">Catégorie 3</option>
+            <option value="partie_prenantes" selected>Partie prenante</option>
+            <option value="evements_intermediaires">Evémenent intermédiaire</option>
+            <option value="evements_redoutes">Evénement redouté</option>
         </select>
         <button id="valider">Valider</button>
+
+        <div id="txtHint">
+
+        </div>
+
+        <div id="cat1">
+            <h4>Partie prenante</h4>
+            <select name="partie_prenantes" id="partie_prenante_id"></select>    
+        </div>
+        <div id="cat2">
+            <h4>Evémenent intermédiaire</h4>
+            <select name="evenements_intermediaires" id="event_int_id"></select>
+        </div>
+        <div id="cat3">
+            <h4>Evénement redouté</h4>
+            <select name="eventenemts_redoutes" id="event_red_id"></select>
+        </div>
     </div>
 
     <canvas id="canvas">
-      <p>Add suitable fallback here.</p>
+
     </canvas>
 
 

@@ -10,6 +10,43 @@ document.getElementById('dessin').onclick = dessinerFleche;
 document.getElementById('suppression').onclick = supprimerObjet;
 document.getElementById('valider').onclick = dessinerCarre;
 document.getElementById('findPath').onclick = renderPaths;
+/*document.getElementById('selectCarre').addEventListener('change', function() {
+    squareChoice = document.getElementById('selectCarre').value;
+    document.getElementById('cat1').style.display = 'none';
+    document.getElementById('cat2').style.display = 'none';
+    document.getElementById('cat3').style.display = 'none';
+    switch (squareChoice) {
+        case 'cat1':
+            document.getElementById('cat1').style.display = 'block';
+            break;
+        case 'cat2':
+            document.getElementById('cat2').style.display = 'block';
+            break;
+        case 'cat3':
+            document.getElementById('cat3').style.display = 'block';
+            break;
+    }
+});
+*/
+document.getElementById('selectCarre').addEventListener('change', (event) => showCategory(event.target.value));
+
+function showCategory(str) {
+    console.log('change : ' + str);
+    var xhttp;
+    if (str == "") {
+      document.getElementById("txtHint").innerHTML = "";
+      return;
+    }
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("txtHint").innerHTML = this.responseText;
+      }
+    };
+    xhttp.open("GET", "getcategory.php?category="+str, true);
+    xhttp.send();
+}
+
 var drawingTool = false;
 var drawingArrow = false;
 var removingTool = false;
