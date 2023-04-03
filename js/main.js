@@ -40,7 +40,7 @@ function showCategory(str) {
     xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-      document.getElementById("txtHint").innerHTML = this.responseText;
+        document.getElementById("txtHint").innerHTML = this.responseText;
       }
     };
     xhttp.open("GET", "getcategory.php?category="+str, true);
@@ -193,17 +193,17 @@ function dessinerCarre() {
     drawingSquare = true;
     squareChoice = document.getElementById('selectCarre').value;
     switch (squareChoice) {
-        case 'cat1':
+        case 'partie_prenantes':
             maxInputChoice = 0;
             maxOutputChoice = -1;
             break;
 
-        case 'cat2':
+        case 'evements_intermediaires':
             maxInputChoice = -1;
             maxOutputChoice = -1;
             break;
 
-        case 'cat3':
+        case 'evements_redoutes':
             maxInputChoice = -1;
             maxOutputChoice = 0;
             break;
