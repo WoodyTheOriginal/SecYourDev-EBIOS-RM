@@ -1,4 +1,35 @@
+/* display context menu on top of everything else and centered*/
+#contextMenu {
+    position: absolute;
+    display: none;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 40%;
+    width: 20%;
+    border: 1px solid #000;
+}
 
+#cat1 {
+    display: none;
+}
+
+#cat2 {
+    display: none;
+}
+
+#cat3 {
+    display: none;
+}
+
+table,th,td {
+    border : 1px solid black;
+    border-collapse: collapse;
+  }
+  th,td {
+    padding: 5px;
+  }
 
 
 
