@@ -29,6 +29,16 @@ document.getElementById('findPath').onclick = renderPaths;
 });
 */
 document.getElementById('selectCarre').addEventListener('change', (event) => showCategory(event.target.value));
+let creerCarre = document.getElementById('creerCarre');
+let fermer = document.getElementById('fermer');
+
+creerCarre.addEventListener('click', function() {
+    document.getElementById('contextMenu').style.display = 'block';
+});
+
+fermer.addEventListener('click', function() {
+    document.getElementById('contextMenu').style.display = 'none';
+});
 
 function showCategory(str) {
     console.log('change : ' + str);
@@ -41,6 +51,20 @@ function showCategory(str) {
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         document.getElementById("txtHint").innerHTML = this.responseText;
+        var validerBoutons = document.getElementsByClassName('validerTable');
+        for (const validerBouton of validerBoutons) {
+            validerBouton.addEventListener('click', function() {
+                console.log('index : ' + this.parentNode.parentNode.rowIndex);
+                //Get full information of the selected row
+                var row = this.parentNode.parentNode;
+                var cells = row.getElementsByTagName('td');
+                var id = cells[0].innerHTML;
+                var nom = cells[1].innerHTML;
+                var description = cells[2].innerHTML;
+                console.log('id : ' + id + ', nom : ' + nom + ', description : ' + description);
+                dessinerCarre();
+            });
+        }
       }
     };
     xhttp.open("GET", "getcategory.php?category="+str, true);
@@ -190,6 +214,7 @@ function supprimerObjet() {
 
 function dessinerCarre() {
     document.body.style.cursor = 'crosshair';
+    document.getElementById('contextMenu').style.display = 'none';
     drawingSquare = true;
     squareChoice = document.getElementById('selectCarre').value;
     switch (squareChoice) {

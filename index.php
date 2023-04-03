@@ -37,6 +37,7 @@
             <button id="valider">Valider</button>
             <div id="txtHint">
             </div>
+            <button id="fermer">Fermer</button>
         </div>
 
         <canvas id="canvas">

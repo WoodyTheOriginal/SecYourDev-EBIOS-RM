@@ -9,23 +9,25 @@ $category = $_GET['category'];
 
 $sql = "SELECT id, nom, description FROM $category";
 
-$stmt = $mysqli->prepare($sql);
-$stmt->execute();
-$stmt->bind_result($categoryId, $nom, $description);
-$stmt->fetch();
-$stmt->close();
+$stmt = $mysqli->query($sql);
 
 echo "<table>";
 echo "<tr>";
 echo "<th>Category ID</th>";
 echo "<th>Nom</th>";
 echo "<th>Description</th>";
+echo "<th></th>";
 echo "</tr>";
-echo "<tr>";
-echo "<td>" . $categoryId . "</td>";
-echo "<td>" . $nom . "</td>";
-echo "<td>" . $description . "</td>";
-echo "</tr>";
+while ($row = $stmt->fetch_assoc()) {
+    echo "<tr>";
+    echo "<td>" . $row['id'] . "</td>";
+    echo "<td>" . $row['nom'] . "</td>";
+    echo "<td>" . $row['description'] . "</td>";
+    echo "<td><button class='validerTable'>Valider</button></td>";
+    echo "</tr>";
+}
 echo "</table>";
+
+$stmt->close();
 
 ?>
