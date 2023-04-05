@@ -11,18 +11,6 @@
     border: 1px solid #000;
 }
 
-#cat1 {
-    display: none;
-}
-
-#cat2 {
-    display: none;
-}
-
-#cat3 {
-    display: none;
-}
-
 table,th,td {
     border : 1px solid black;
     border-collapse: collapse;
@@ -30,6 +18,18 @@ table,th,td {
   th,td {
     padding: 5px;
   }
+
+/*position the menu on the right side of the screen taking full height*/
+#infoMenu {
+    position: absolute;
+    display: none;
+    z-index: 1000;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 20%;
+    border: 1px solid #000;
+}
 
 
 
