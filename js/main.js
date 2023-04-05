@@ -31,6 +31,8 @@ document.getElementById('findPath').onclick = renderPaths;
 document.getElementById('selectCarre').addEventListener('change', (event) => showCategory(event.target.value));
 let creerCarre = document.getElementById('creerCarre');
 let fermer = document.getElementById('fermer');
+document.getElementById('export').addEventListener('click', () => exportDiagram());
+document.getElementById('import').addEventListener('click', () => importDiagram());
 
 creerCarre.addEventListener('click', function() {
     document.getElementById('contextMenu').style.display = 'block';
@@ -465,4 +467,247 @@ function reassignIds() {
     }
 }
 
+<<<<<<< Updated upstream
+=======
+function dessinerChemin() {
+    document.body.style.cursor = 'crosshair';
+    drawingPath = true;
+}
+
+function mergePaths() {
+    paths[paths.length] = pathTemp;
+    pathTemp = [];
+    console.log(paths);
+    arrows.forEach(arrow => {
+        arrow.color = 'black';
+    });
+    drawCanvas();
+}
+
+function showChemin() {
+    let value = document.getElementById("showChemin").value;
+    arrows.forEach(arrow => {
+        arrow.color = 'black';
+    }); 
+    if (paths.length >= (value)){
+        paths[(value - 1)].forEach(arrow => {
+            if (arrow instanceof Arrow){
+                arrow.color = 'green';
+            }
+        });
+    }
+    drawCanvas();
+}
+
+function showInfoMenu(object) {
+    let infoMenu = document.getElementById("infoMenu");
+    let infoMenuList = document.getElementById("infoMenuList");
+    let infoMenuData = infoMenuList.getElementsByTagName("td");
+    let inputInfoData = document.getElementById("inputInfoData");
+    let modifierData = document.getElementById("modifierData");
+    let modifiedData = null;
+    infoMenu.style.display = "block";
+    infoMenuList.innerHTML = "";
+    infoMenuList.innerHTML += "<td>id : " + object.id + " <button class='modifierInfoMenu'>Modifier</button> </td>";
+    infoMenuList.innerHTML += "<td>nom : " + object.nom + " <button class='modifierInfoMenu'>Modifier</button></td>";  
+    infoMenuList.innerHTML += "<td>description : " + object.description + " <button class='modifierInfoMenu'>Modifier</button></td>";
+    infoMenuList.innerHTML += "<td>vraisemblance : " + object.vraisemblance + " <button class='modifierInfoMenu'>Modifier</button></td>";
+    let infoMenuButtons = document.getElementsByClassName("modifierInfoMenu");
+    for (const button of infoMenuButtons) {
+        button.addEventListener('click', function(e) {
+            inputInfoData.style.display = "block";
+            modifierData.style.display = "block";
+            console.log(selectedSquare);
+            //modifiedData = button.parentNode.indexOf(button.parentNode.parentNode);
+
+            switch (this.parentNode.cellIndex) {
+                case 0:
+                    modifiedData = "id";
+                    break;
+                
+                case 1:
+                    modifiedData = "nom";
+                    break;
+                
+                case 2:
+                    modifiedData = "description";
+                    break;
+
+                case 3:
+                    modifiedData = "vraisemblance";
+                    break;
+
+                default:
+                    break;
+            }
+        });
+    }
+    modifierData.addEventListener('click', function(e) {
+        inputInfoData.style.display = "none";
+        modifierData.style.display = "none";
+
+        switch (modifiedData) {
+            case "id":
+                selectedObject.id = inputInfoData.value;
+                break;
+
+            case "nom":
+                selectedObject.nom = inputInfoData.value;
+                break;
+
+            case "description":
+                selectedObject.description = inputInfoData.value;
+                break;
+
+            case "vraisemblance":
+                selectedObject.vraisemblance = inputInfoData.value;
+                break;
+        
+            default:
+                break;
+        }
+        showInfoMenu(selectedObject);
+    });
+}
+
+function exitMenu() {
+    let infoMenu = document.getElementById("infoMenu");
+    infoMenu.style.display = "none";
+    selectedObject = null;
+    selectedArrow = null;
+}
+
+function showCategoryCarre(str) {
+    console.log('change : ' + str);
+    var xhttp;
+    if (str == "") {
+      document.getElementById("txtHint").innerHTML = "";
+      return;
+    }
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("txtHint").innerHTML = this.responseText;
+        var validerBoutons = document.getElementsByClassName('validerTable');
+        for (const validerBouton of validerBoutons) {
+            validerBouton.addEventListener('click', function() {
+                console.log('index : ' + this.parentNode.parentNode.rowIndex);
+                //Get full information of the selected row
+                var row = this.parentNode.parentNode;
+                var cells = row.getElementsByTagName('td');
+                var id = cells[0].innerHTML;
+                var nom = cells[1].innerHTML;
+                var description = cells[2].innerHTML;
+                console.log('id : ' + id + ', nom : ' + nom + ', description : ' + description);
+                dessinerCarre();
+            });
+        }
+      }
+    };
+    xhttp.open("GET", "getcategory.php?category="+str, true);
+    xhttp.send();
+}
+
+function showCategoryArrow() {
+    var xhttp;
+    document.getElementById("txtHint2").innerHTML = "";
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("txtHint2").innerHTML = this.responseText;
+        var validerBoutons = document.getElementsByClassName('validerTable');
+        for (const validerBouton of validerBoutons) {
+            validerBouton.addEventListener('click', function() {
+                //Get full information of the selected row
+                var row = this.parentNode.parentNode;
+                var cells = row.getElementsByTagName('td');
+                var id = cells[0].innerHTML;
+                var nom = cells[1].innerHTML;
+                var description = cells[2].innerHTML;
+                selectedObject.id = id;
+                selectedObject.nom = nom;
+                selectedObject.description = description;
+                showInfoMenu(selectedObject);
+            });
+        }
+      }
+    };
+    xhttp.open("GET", "getcategory.php?category=evements_intermediaires", true);
+    xhttp.send();
+}   
+
+function exportDiagram() {
+    var xhttp;
+    var data = [];
+    data[0] = squares;
+    data[1] = arrows;
+    data[2] = paths;
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log(this.responseText);
+        }
+    };
+    xhttp.open("POST", "export.php", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send("data=" + JSON.stringify(data[0]) + "&data2=" + JSON.stringify(data[1]) + "&data3=" + JSON.stringify(data[2]));
+    //console.log("data=" + JSON.stringify(squares) + "&data2=" + JSON.stringify(arrows) + "&data3=" + JSON.stringify(paths));
+}
+
+function importDiagram() {
+    var xhttp;
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            //console.log(this.responseText);
+            var data = JSON.parse(this.responseText);
+            var dataSquare = data.squares;
+            var dataArrow = data.arrows;
+            var dataPath = data.paths;
+            squares = [];
+            arrows = [];
+            paths = [];
+            dataSquare.forEach(element => {
+                squares.push(new Square(element.id, element.x, element.y, element.size, element.color, element.maxInput, element.maxOutput));
+            });
+            dataArrow.forEach(element => {
+                var arrow = new Arrow(element.startX, element.startY);
+                squares.forEach(square => {
+                    if (square.id == element.startSquare.id) {
+                        arrow.startSquare = square;
+                    }
+
+                    if (square.id == element.endSquare.id) {
+                        arrow.endSquare = square;
+                    }
+                });
+                arrows.push(arrow);
+            });
+            dataPath.forEach(array => {
+                array.forEach(element => {
+                    arrows.forEach(arrow => {
+                        if (element.startSquare !== undefined && element.endSquare !== undefined && arrow.startSquare.id == element.startSquare.id && arrow.endSquare.id == element.endSquare.id ) {
+                            element = arrow;
+                        }
+                    });
+                    squares.forEach(square => {
+                        if (square.x == element.x && square.y == element.y) {
+                            element = square;
+                        }
+                    });
+                    pathTemp.push(element);
+                });
+                paths.push(pathTemp);
+                pathTemp = [];
+            });
+            drawCanvas();
+            console.log(paths);
+        }
+    };
+    xhttp.open("GET", "import.php", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send();
+};
+
+>>>>>>> Stashed changes
 drawCanvas();
