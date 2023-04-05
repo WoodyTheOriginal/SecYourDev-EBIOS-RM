@@ -6,29 +6,14 @@ var offsetX = 0;
 var offsetY = 0;
 var mouseX;
 var mouseY;
+document.getElementById('chemins').onclick = dessinerChemin;
 document.getElementById('dessin').onclick = dessinerFleche;
 document.getElementById('suppression').onclick = supprimerObjet;
 document.getElementById('valider').onclick = dessinerCarre;
 document.getElementById('findPath').onclick = renderPaths;
-/*document.getElementById('selectCarre').addEventListener('change', function() {
-    squareChoice = document.getElementById('selectCarre').value;
-    document.getElementById('cat1').style.display = 'none';
-    document.getElementById('cat2').style.display = 'none';
-    document.getElementById('cat3').style.display = 'none';
-    switch (squareChoice) {
-        case 'cat1':
-            document.getElementById('cat1').style.display = 'block';
-            break;
-        case 'cat2':
-            document.getElementById('cat2').style.display = 'block';
-            break;
-        case 'cat3':
-            document.getElementById('cat3').style.display = 'block';
-            break;
-    }
-});
-*/
-document.getElementById('selectCarre').addEventListener('change', (event) => showCategory(event.target.value));
+document.getElementById('submit').onclick = showChemin;
+document.getElementById('selectCarre').addEventListener('change', (event) => showCategoryCarre(event.target.value));
+document.getElementById('fermer2').addEventListener('click', () => exitMenu());
 let creerCarre = document.getElementById('creerCarre');
 let fermer = document.getElementById('fermer');
 document.getElementById('export').addEventListener('click', () => exportDiagram());
@@ -42,37 +27,7 @@ fermer.addEventListener('click', function() {
     document.getElementById('contextMenu').style.display = 'none';
 });
 
-function showCategory(str) {
-    console.log('change : ' + str);
-    var xhttp;
-    if (str == "") {
-      document.getElementById("txtHint").innerHTML = "";
-      return;
-    }
-    xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        document.getElementById("txtHint").innerHTML = this.responseText;
-        var validerBoutons = document.getElementsByClassName('validerTable');
-        for (const validerBouton of validerBoutons) {
-            validerBouton.addEventListener('click', function() {
-                console.log('index : ' + this.parentNode.parentNode.rowIndex);
-                //Get full information of the selected row
-                var row = this.parentNode.parentNode;
-                var cells = row.getElementsByTagName('td');
-                var id = cells[0].innerHTML;
-                var nom = cells[1].innerHTML;
-                var description = cells[2].innerHTML;
-                console.log('id : ' + id + ', nom : ' + nom + ', description : ' + description);
-                dessinerCarre();
-            });
-        }
-      }
-    };
-    xhttp.open("GET", "getcategory.php?category="+str, true);
-    xhttp.send();
-}
-
+var drawingPath = false;
 var drawingTool = false;
 var drawingArrow = false;
 var removingTool = false;
@@ -80,8 +35,11 @@ var drawingSquare = false;
 var squareChoice = null;
 var maxInputChoice = null;
 var maxOutputChoice = null;
+var pathTemp = [];
 var paths = [];
 var adjList = [];
+var selectedObject = null;
+var selectedArrow = null;
 
 var squares = [
     new Square(0, 100, 100, 50, 'red', -1, -1),
@@ -106,6 +64,9 @@ function Square(id, x, y, size, color, maxInput, maxOutput) {
     this.maxInput = maxInput;
     this.maxOutput = maxOutput;
     this.connections = [];
+    this.nom = null;
+    this.description = null;
+    this.vraisemblance = null;
 }
 
 // Define the draw method for the Square class
@@ -128,6 +89,10 @@ function Arrow(startX, startY) {
     this.drawing = true;
     this.startSquare = null;
     this.endSquare = null;
+    this.color = 'black';
+    this.nom = null;
+    this.description = null;
+    this.vraisemblance = null;
 }
 
 // Define the updateEnd method for the Arrow class
@@ -150,7 +115,7 @@ Arrow.prototype.finishDrawing = function() {
 // Define the draw method for the Arrow class
 Arrow.prototype.draw = function() {
     var ctx = document.getElementById('canvas').getContext('2d');
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = this.color;
     ctx.beginPath();
     ctx.moveTo(this.startX, this.startY);
     ctx.lineTo(this.endX, this.endY);
@@ -158,7 +123,7 @@ Arrow.prototype.draw = function() {
 
     // Draw the arrow head using a triangle oriented to the end of the arrow
     var angle = Math.atan2(this.endY - this.startY, this.endX - this.startX);
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = this.color;
     ctx.save();
     ctx.translate(this.endX, this.endY);
     ctx.rotate(angle);
@@ -247,11 +212,11 @@ canvas.addEventListener('mousedown', function(e){
     mouseY = e.pageY - canvas.offsetTop;
 
     for (let i = 0; i < squares.length; i++) {
-
-        if (squares[i].containsPoint(mouseX, mouseY)){
+        if (squares[i].containsPoint(mouseX, mouseY) === true){
             if (!drawingTool && !drawingSquare && !removingTool){
                 selectedSquare = squares[i];
-                //console.log(selectedSquare);
+                selectedObject = squares[i];
+                //console.log(selectedSquare + " " + selectedObject);
                 //console.log(squares);
             }
 
@@ -302,6 +267,7 @@ canvas.addEventListener('mousedown', function(e){
 
     for (let i = 0; i < arrows.length; i++) {
         if (arrows[i].containsPoint(mouseX, mouseY)) {
+            selectedArrow = arrows[i];
             console.log(arrows[i]);
             if (removingTool){
                 arrows[i].startSquare.output -= 1;
@@ -310,14 +276,51 @@ canvas.addEventListener('mousedown', function(e){
                 drawCanvas();
                 exitTool();
             }
+
+            if (drawingPath) {
+                arrows[i].color = 'red';
+                pathTemp[0] = squares[0];
+                if (arrows[i].startSquare !== pathTemp[pathTemp.length - 1] ) {
+                    console.log("Chemin invalide");
+                    pathTemp = [];
+                    arrows.forEach(arrow => {
+                        arrow.color = 'black';
+                    });
+                    drawCanvas();
+                }else {
+                    if (arrows[i].startSquare === pathTemp[pathTemp.length - 1]) {
+                        pathTemp.push(arrows[i], arrows[i].endSquare);
+                    }
+                    if (arrows[i].endSquare === (squares[squares.length - 1])){
+                        pathTemp.push(arrows[i]);
+                        mergePaths();
+                    }
+                    else {
+                        pathTemp.push(arrows[i].startSquare, arrows[i], arrows[i].endSquare);
+                    }
+                }
+                drawCanvas();
+                exitTool();
+            }
+
+            if (!drawingPath && !drawingTool && !removingTool) {
+                selectedObject = arrows[i];
+            }   
         }        
     }
 
     if (drawingArrow && points === 2) {
         currentArrow.finishDrawing();
+        showCategoryArrow();
         arrows.push(currentArrow);
+        showInfoMenu(currentArrow);
         currentArrow = null;
         exitTool();
+    }
+
+    if (!drawingTool && !drawingSquare && !removingTool && !drawingArrow && !drawingPath && !selectedArrow && !selectedSquare){
+        console.log("exit menu");
+        exitMenu();
     }
 
     if (drawingSquare){
@@ -372,8 +375,16 @@ canvas.addEventListener('mousemove', function(e) {
 
 canvas.addEventListener('mouseup', function(e) {
 
+    if (selectedObject) {
+        showInfoMenu(selectedObject);
+    }
+
     if (selectedSquare) {
         selectedSquare = null;
+    }
+
+    if (selectedArrow) {
+        selectedArrow = null;
     }
 
 })
@@ -389,6 +400,7 @@ function exitTool() {
     drawingTool = false;
     drawingArrow = false;
     drawingSquare = false;
+    drawingPath = false;
     removingTool = false;
     maxInputChoice = 0;
     maxOutputChoice = 0;  
@@ -467,8 +479,183 @@ function reassignIds() {
     }
 }
 
-<<<<<<< Updated upstream
-=======
+function dessinerChemin() {
+    document.body.style.cursor = 'crosshair';
+    drawingPath = true;
+}
+
+function mergePaths() {
+    paths[paths.length] = pathTemp;
+    pathTemp = [];
+    console.log(paths);
+    arrows.forEach(arrow => {
+        arrow.color = 'black';
+    });
+    drawCanvas();
+}
+
+function showChemin() {
+    let value = document.getElementById("showChemin").value;
+    arrows.forEach(arrow => {
+        arrow.color = 'black';
+    }); 
+    if (paths.length >= (value)){
+        paths[value - 1].forEach(arrow => {
+            if (arrow instanceof Arrow){
+                arrow.color = 'green';
+            }
+        });
+    }
+    drawCanvas();
+}
+
+function showInfoMenu(object) {
+    let infoMenu = document.getElementById("infoMenu");
+    let infoMenuList = document.getElementById("infoMenuList");
+    let infoMenuData = infoMenuList.getElementsByTagName("td");
+    let inputInfoData = document.getElementById("inputInfoData");
+    let modifierData = document.getElementById("modifierData");
+    let modifiedData = null;
+    infoMenu.style.display = "block";
+    infoMenuList.innerHTML = "";
+    infoMenuList.innerHTML += "<td>id : " + object.id + " <button class='modifierInfoMenu'>Modifier</button> </td>";
+    infoMenuList.innerHTML += "<td>nom : " + object.nom + " <button class='modifierInfoMenu'>Modifier</button></td>";  
+    infoMenuList.innerHTML += "<td>description : " + object.description + " <button class='modifierInfoMenu'>Modifier</button></td>";
+    infoMenuList.innerHTML += "<td>vraisemblance : " + object.vraisemblance + " <button class='modifierInfoMenu'>Modifier</button></td>";
+    let infoMenuButtons = document.getElementsByClassName("modifierInfoMenu");
+    for (const button of infoMenuButtons) {
+        button.addEventListener('click', function(e) {
+            inputInfoData.style.display = "block";
+            modifierData.style.display = "block";
+            console.log(selectedSquare);
+            //modifiedData = button.parentNode.indexOf(button.parentNode.parentNode);
+
+            switch (this.parentNode.cellIndex) {
+                case 0:
+                    modifiedData = "id";
+                    break;
+                
+                case 1:
+                    modifiedData = "nom";
+                    break;
+                
+                case 2:
+                    modifiedData = "description";
+                    break;
+
+                case 3:
+                    modifiedData = "vraisemblance";
+                    break;
+
+                default:
+                    break;
+            }
+        });
+    }
+    modifierData.addEventListener('click', function(e) {
+        inputInfoData.style.display = "none";
+        modifierData.style.display = "none";
+
+        switch (modifiedData) {
+            case "id":
+                selectedObject.id = inputInfoData.value;
+                break;
+
+            case "nom":
+                selectedObject.nom = inputInfoData.value;
+                break;
+
+            case "description":
+                selectedObject.description = inputInfoData.value;
+                break;
+
+            case "vraisemblance":
+                selectedObject.vraisemblance = inputInfoData.value;
+                break;
+        
+            default:
+                break;
+        }
+        showInfoMenu(selectedObject);
+    });
+}
+
+function exitMenu() {
+    let infoMenu = document.getElementById("infoMenu");
+    infoMenu.style.display = "none";
+    selectedObject = null;
+    selectedArrow = null;
+}
+
+function showCategoryCarre(str) {
+    console.log('change : ' + str);
+    var xhttp;
+    if (str == "") {
+      document.getElementById("txtHint").innerHTML = "";
+      return;
+    }
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("txtHint").innerHTML = this.responseText;
+        var validerBoutons = document.getElementsByClassName('validerTable');
+        for (const validerBouton of validerBoutons) {
+            validerBouton.addEventListener('click', function() {
+                console.log('index : ' + this.parentNode.parentNode.rowIndex);
+                //Get full information of the selected row
+                var row = this.parentNode.parentNode;
+                var cells = row.getElementsByTagName('td');
+                var id = cells[0].innerHTML;
+                var nom = cells[1].innerHTML;
+                var description = cells[2].innerHTML;
+                console.log('id : ' + id + ', nom : ' + nom + ', description : ' + description);
+                dessinerCarre();
+            });
+        }
+      }
+    };
+    xhttp.open("GET", "getcategory.php?category="+str, true);
+    xhttp.send();
+}
+
+function showCategoryArrow() {
+    var xhttp;
+    document.getElementById("txtHint2").innerHTML = "";
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("txtHint2").innerHTML = this.responseText;
+        var validerBoutons = document.getElementsByClassName('validerTable');
+        for (const validerBouton of validerBoutons) {
+            validerBouton.addEventListener('click', function() {
+                //Get full information of the selected row
+                var row = this.parentNode.parentNode;
+                var cells = row.getElementsByTagName('td');
+                var id = cells[0].innerHTML;
+                var nom = cells[1].innerHTML;
+                var description = cells[2].innerHTML;
+                selectedObject.id = id;
+                selectedObject.nom = nom;
+                selectedObject.description = description;
+                showInfoMenu(selectedObject);
+            });
+        }
+      }
+    };
+    xhttp.open("GET", "getcategory.php?category=evements_intermediaires", true);
+    xhttp.send();
+}   
+
+function exportDiagram() {
+    var xhttp;
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log(this.responseText);
+        }
+    };
+}
+
 function dessinerChemin() {
     document.body.style.cursor = 'crosshair';
     drawingPath = true;
@@ -709,5 +896,4 @@ function importDiagram() {
     xhttp.send();
 };
 
->>>>>>> Stashed changes
 drawCanvas();

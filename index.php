@@ -50,6 +50,26 @@
             <button id="fermer">Fermer</button>
         </div>
 
+        <div id="infoMenu">
+            <h3>Informations</h3>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Vraisemblance</th>
+                </tr>
+                <tr id="infoMenuList">
+                </tr>
+            </table>
+            <input type='text' id='inputInfoData' placeholder='modifier' style='display:none'>
+            <button id='modifierData' style='display:none'>Modifier</button>
+            <h3>Dans la base de données</h3>
+            <div id="txtHint2">
+            </div>
+            <button id="fermer2">Fermer</button>
+        </div>
+
         <canvas id="canvas">
 
         </canvas>
