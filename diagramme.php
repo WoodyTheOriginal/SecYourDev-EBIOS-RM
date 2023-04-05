@@ -12,32 +12,27 @@
     </head>
 
     <body>
+        <!--<script type='module' src="js/affichage_diagramme.js"></script> -->
         
         <script type='module' src="js/main.js"></script>
 
-        <div id='mainMenu'>
-            <button href="js/index.js">Nouveau Diagramme</button>
-            <button id="importButton">Importer</button>
-        </div>
+            <div class="toolbar">
+                <button id="creerCarre">Créer un carré</button>
+                <button id="suppression">Supprimer élément</button>
+                <button id="dessin">Dessiner des flèches</button>
+                <button id="findPath">Afficher chemins</button>  
+                <button id="chemins">Dessiner chemins</button>  
+                <input type="text" id="showChemin" placeholder="ID"/>
+                <button id='submit'>Submit</button>
+                <button id='import'>Importer</button>
+                <button id="export">Sauvegarder diagramme</button> 
+                <div id="txtHint3">
+                </div> 
+            </div>
 
-        <div id='importMenu'>            
-        </div>
+        <h1> Bonjour </h1>    
 
-
-        <div class="toolbar">
-            <button id="creerCarre">Créer un carré</button>
-            <button id="suppression">Supprimer élément</button>
-            <button id="dessin">Dessiner des flèches</button>
-            <button id="findPath">Afficher chemins</button>  
-            <button id="chemins">Dessiner chemins</button>  
-            <input type="text" id="showChemin" placeholder="ID"/>
-            <button id='submit'>Submit</button>
-            <button id='import'>Importer</button>
-            <button id="export">Sauvegarder diagramme</button> 
-            <div id="txtHint3">
-            </div> 
-        </div>
-
+    <!-- TEST GRAPHIQUE -->
 
         <div id="contextMenu">
             <h3>Menu</h3>
@@ -76,6 +71,7 @@
 
         </canvas>
 
+    <!--  Fin TEST GRAPHIQUE -->
 
     </body>
 
