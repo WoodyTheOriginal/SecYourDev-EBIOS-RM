@@ -5,15 +5,12 @@ if ($mysqli->connect_errno) {
     echo "Echec lors de la connexion à MySQL : (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 }
 
-$sql = "SELECT squares, arrows, paths FROM diagramme";
+$id = $_GET['id'];
+
+$sql = "SELECT squares, arrows, paths FROM diagramme WHERE id = $id";
 
 $stmt = $mysqli->query($sql);
 
-/*if ($stmt === TRUE) {
-    echo "New record created successfully";
-} else {
-    echo "Error: " . $sql . "<br>" . $mysqli->error;
-}*/
 while ($row = $stmt->fetch_assoc()) {
     $squares = $row['squares'];
     $arrows = $row['arrows'];
