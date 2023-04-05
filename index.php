@@ -21,8 +21,6 @@
                 <button id="suppression">Supprimer élément</button>
                 <button id="dessin">Dessiner des flèches</button>
                 <button id="findPath">Afficher chemins</button>  
-<<<<<<< Updated upstream
-=======
                 <button id="chemins">Dessiner chemins</button>  
                 <input type="text" id="showChemin" placeholder="ID"/>
                 <button id='submit'>Submit</button>
@@ -30,7 +28,6 @@
                 <button id="export">Sauvegarder diagramme</button> 
                 <div id="txtHint3">
                 </div> 
->>>>>>> Stashed changes
             </div>
 
         <h1> Bonjour </h1>    
