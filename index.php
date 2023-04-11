@@ -6,8 +6,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Diagramme</title>
         <link href="css/style.css" rel="stylesheet" type="text/css">
-        <title>Diagramme</title>
-
         <?php //  include 'header.php' ; ?>
     </head>
 
@@ -16,14 +14,14 @@
         <script type='module' src="js/main.js"></script>
 
         <div id='mainMenu'>
-            <button href="js/index.js">Nouveau Diagramme</button>
+            <a href="diagramme.php"><button>Nouveau Diagramme</button></a>
             <button id="importButton">Importer</button>
         </div>
 
         <div id='importMenu'>            
         </div>
 
-
+<!--
         <div class="toolbar">
             <button id="creerCarre">Créer un carré</button>
             <button id="suppression">Supprimer élément</button>
@@ -75,6 +73,7 @@
         <canvas id="canvas">
 
         </canvas>
+-->
 
 
     </body>

@@ -1,3 +1,30 @@
+// Initialisation de toutes les variables globales
+var canvas = document.getElementById('canvas');
+var ctx;
+var offsetX = 0;
+var offsetY = 0;
+var mouseX;
+var mouseY;
+var nom;
+var drawingPath = false;
+var drawingTool = false;
+var drawingArrow = false;
+var removingTool = false;
+var drawingSquare = false;
+var squareChoice = null;
+var maxInputChoice = null;
+var maxOutputChoice = null;
+var pathTemp = [];
+var paths = [];
+var adjList = [];
+var selectedObject = null;
+var selectedArrow = null;
+var squares = [];
+var arrows = [];
+var currentArrow;
+var selectedSquare;
+var points = 0;
+
 //Importation des classes
 import { Square } from './modules/squares.js';
 import { Arrow } from './modules/arrows.js';
@@ -63,32 +90,33 @@ if (exists(fermer)) {
     });
 }
 
-if (exists(afficherCheminsBouton)) {
-    afficherCheminsBouton.addEventListener('click', () => showPaths());
-}
-
 //Fonction qui vérifie l'existence du canvas
 if (exists(canvas)) {
     //Ajout de tous les event listeners sur le canvas
-    canvas.addEventListener('mousedown', function(e){
 
+    //Détection du click souris lorsqu'elle est enfoncée
+    canvas.addEventListener('mousedown', function(e){
+        //Récupération des coordonnées de la souris
         mouseX = e.pageX - canvas.offsetLeft;
         mouseY = e.pageY - canvas.offsetTop;
-    
+        
+        //Tous les cas pour les carrés
         for (let i = 0; i < squares.length; i++) {
+            //Si la souris est sur un carré
             if (squares[i].containsPoint(mouseX, mouseY) === true){
+                /*Si on n'est pas en train de poser un carré, ou une flèche et pas en train de supprimer un objet
+                alors on attribue le carré en tant que carré et objet sélectionné*/
                 if (!drawingTool && !drawingSquare && !removingTool){
                     selectedSquare = squares[i];
                     selectedObject = squares[i];
-                    //console.log(selectedSquare + " " + selectedObject);
-                    //console.log(squares);
                 }
-    
+                //Si on est en train de dessiner une flèche et qu'on a déjà un point de départ
                 if (drawingArrow && points === 1){
+                    //Si le carré peut encore accepter des inputs
                     if (squares[i].input + 1 <= squares[i].maxInput || squares[i].maxInput < 0){
                         points = 2;
                         squares[i].input += 1;
-                        //console.log("nombre input : " + squares[i].input);
+                        //update de la fin de la flèche avec les coordonnées du milieu du côté du carré
                         currentArrow.updateEnd(squares[i].x, squares[i].y + squares[i].size / 2);
                         currentArrow.endSquare = squares[i];
                         currentArrow.startSquare.connections.push(squares[i]);
@@ -97,28 +125,27 @@ if (exists(canvas)) {
                         exitTool();
                     }
                 }
-    
+                //Si on est en train de dessiner une flèche et qu'on n'a pas encore de point de départ
                 if (drawingTool && points === 0){
-    
+                    //Si le carré peut encore accepter des outputs
                     if (squares[i].output + 1 <= squares[i].maxOutput || squares[i].maxOutput < 0){
                         drawingArrow = true;
                         points = 1;
+                        //Création d'une nouvelle flèche avec les coordonnées du milieu du côté du carré
                         var newArrow = new Arrow(squares[i].x + squares[i].size, squares[i].y + squares[i].size / 2);
                         newArrow.startSquare = squares[i];
                         currentArrow = newArrow;
                         squares[i].output += 1;
-                        //console.log("nombre output : " + squares[i].output);
                     } else {
                         alert("Pas plus de sorties");
                         exitTool();
                     }
                 }
-    
+                //Si on est en train de supprimer un objet
                 if (removingTool){
                     if (squares[i].input === 0 && squares[i].output === 0){
                         squares.splice(i, 1);
-                        //console.log("suppression");
-                        reassignIds();
+                        reassignIds(); //Réassignation des ids des carrés pour éviter les problèmes
                         drawCanvas();
                         exitTool();
                     } else {
@@ -128,19 +155,22 @@ if (exists(canvas)) {
                 }
             }
         }
-    
+        //Tous les cas pour les flèches
         for (let i = 0; i < arrows.length; i++) {
+            //Si la souris est sur une flèche
             if (arrows[i].containsPoint(mouseX, mouseY)) {
                 selectedArrow = arrows[i];
-                console.log(arrows[i]);
+                //Si on est en train de supprimer un objet
                 if (removingTool){
+                    //On retire 1 à l'output du carré de départ et 1 à l'input du carré d'arrivée
                     arrows[i].startSquare.output -= 1;
                     arrows[i].endSquare.input -= 1;
                     arrows.splice(i, 1);
                     drawCanvas();
                     exitTool();
                 }
-    
+
+                //Si on est en train de dessiner un chemin
                 if (drawingPath) {
                     arrows[i].color = 'red';
                     pathTemp[0] = squares[0];
@@ -174,7 +204,7 @@ if (exists(canvas)) {
         }
     
         if (drawingArrow && points === 2) {
-            currentArrow.finishDrawing();
+            currentArrow.finishDrawing(ctx);
             showCategoryArrow();
             arrows.push(currentArrow);
             showInfoMenu(currentArrow);
@@ -183,20 +213,20 @@ if (exists(canvas)) {
         }
     
         if (!drawingTool && !drawingSquare && !removingTool && !drawingArrow && !drawingPath && !selectedArrow && !selectedSquare){
-            console.log("exit menu");
             exitMenu();
         }
     
         if (drawingSquare){
             var newSquare = new Square(squares.length , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
+            newSquare.nom = nom;
             squares.push(newSquare);
             drawCanvas();
             exitTool();
         }
     })
-    
+
     canvas.addEventListener('mousemove', function(e) {
-    
+
         mouseX = e.pageX - canvas.offsetLeft;
         mouseY = e.pageY - canvas.offsetTop;
     
@@ -205,7 +235,8 @@ if (exists(canvas)) {
             selectedSquare.y = mouseY - (selectedSquare.size / 2);
             drawCanvas();
         }
-    
+
+        //Boucle permettant de déplacer les flèches lorsque l'on déplace un carré
         for (let i = 0; i < arrows.length; i++) {
             arrows[i].updateEnd(arrows[i].endSquare.x, arrows[i].endSquare.y + arrows[i].endSquare.size / 2);
             arrows[i].updateStart(arrows[i].startSquare.x, arrows[i].startSquare.y + arrows[i].startSquare.size / 2);
@@ -308,27 +339,15 @@ function dessinerCarre() {
     }
 }
 
-
-
-
+//Echap permet de quitter les outils de dessin, suppression, etc
 document.addEventListener('keydown', evt => {
     if (evt.key === 'Escape') {
         exitTool();
     }
 });
 
-function exitTool() {
-    document.body.style.cursor = 'default'; 
-    drawingTool = false;
-    drawingArrow = false;
-    drawingSquare = false;
-    drawingPath = false;
-    removingTool = false;
-    maxInputChoice = 0;
-    maxOutputChoice = 0;  
-    points = 0;
-}
-
+//Fonctions permettant le repérage automatique des chemins existants entre le départ et l'arrivée
+/*
 function printAllPaths(s, d) {
     let visited = [];
     let path = [];
@@ -393,6 +412,7 @@ function renderPaths() {
 
     printAllPaths(squares[0].id, squares[squares.length - 1].id);
 }
+*/
 
 // Reaffecter les id des carrés
 function reassignIds() {
@@ -401,11 +421,93 @@ function reassignIds() {
     }
 }
 
+function drawCanvas() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+		// Dessiner les carrés
+		squares.forEach(function(square) {
+			square.draw(ctx);
+		});
+		
+		// Dessiner les flèches si elles existent
+		if (currentArrow) {
+			currentArrow.draw(ctx);
+		}
+
+        arrows.forEach(function(arrow) {
+            arrow.draw(ctx);
+        });
+}
+
+//Vérifier qu'un objet du DOM existe
+function exists(object) {
+    if (object !== undefined && object !== null) {
+        return true;
+    } else {
+        return false;
+    }   
+}
+
+//Outil dessin de flèche
+function dessinerFleche() {
+    document.body.style.cursor = 'crosshair';
+    drawingTool = true;
+
+}
+
+//Outil suppression objet
+function supprimerObjet() {
+    document.body.style.cursor = 'crosshair';
+    removingTool = true;
+}
+
+//Outil dessin de carré
+function dessinerCarre() {
+    document.body.style.cursor = 'crosshair';
+    document.getElementById('contextMenu').style.display = 'none';
+    drawingSquare = true;
+    squareChoice = document.getElementById('selectCarre').value;
+    //Définition du nombre d'outputs et inputs en fonction du type de carré
+    switch (squareChoice) {
+        case 'sources_de_risques':
+            maxInputChoice = 0;
+            maxOutputChoice = -1;
+            break;
+
+        case 'partie_prenante':
+            maxInputChoice = -1;
+            maxOutputChoice = -1;
+            break;
+
+        case 'evenements_redoutes':
+            maxInputChoice = -1;
+            maxOutputChoice = 0;
+            break;
+
+        default:
+            break;
+    }
+}
+
+//Quitter tous les outils
+function exitTool() {
+    document.body.style.cursor = 'default'; 
+    drawingTool = false;
+    drawingArrow = false;
+    drawingSquare = false;
+    drawingPath = false;
+    removingTool = false;
+    maxInputChoice = 0;
+    maxOutputChoice = 0;  
+    points = 0;
+}
+
+//Outil dessin de chemin
 function dessinerChemin() {
     document.body.style.cursor = 'crosshair';
     drawingPath = true;
 }
 
+//Les chemins sont stockés dans des tableaux différents on les met tous dans le même tableau
 function mergePaths() {
     paths[paths.length] = pathTemp;
     pathTemp = [];
@@ -416,6 +518,7 @@ function mergePaths() {
     drawCanvas();
 }
 
+//Afficher les chemins en mettant les flèches en vert
 function showChemin() {
     let value = document.getElementById("showChemin").value;
     arrows.forEach(arrow => {
@@ -430,10 +533,10 @@ function showChemin() {
     drawCanvas();
 }
 
+//Afficher le menu d'information permettant de modifier les informations d'un carré ou d'une flèche
 function showInfoMenu(object) {
     let infoMenu = document.getElementById("infoMenu");
     let infoMenuList = document.getElementById("infoMenuList");
-    let infoMenuData = infoMenuList.getElementsByTagName("td");
     let inputInfoData = document.getElementById("inputInfoData");
     let modifierData = document.getElementById("modifierData");
     let modifiedData = null;
@@ -448,9 +551,7 @@ function showInfoMenu(object) {
         button.addEventListener('click', function(e) {
             inputInfoData.style.display = "block";
             modifierData.style.display = "block";
-            console.log(selectedSquare);
-            //modifiedData = button.parentNode.indexOf(button.parentNode.parentNode);
-
+            //En fonction de la position du bouton dans le tableau on modifie la variable modifiedData
             switch (this.parentNode.cellIndex) {
                 case 0:
                     modifiedData = "id";
@@ -474,33 +575,38 @@ function showInfoMenu(object) {
         });
     }
     modifierData.addEventListener('click', function(e) {
-        inputInfoData.style.display = "none";
-        modifierData.style.display = "none";
-
+        //A partir de la variable modifiedData on peut savoir quel champ on doit modifier
         switch (modifiedData) {
             case "id":
                 selectedObject.id = inputInfoData.value;
+                modifiedData = null;
                 break;
 
             case "nom":
                 selectedObject.nom = inputInfoData.value;
+                modifiedData = null;
                 break;
 
             case "description":
                 selectedObject.description = inputInfoData.value;
+                modifiedData = null;
                 break;
 
             case "vraisemblance":
                 selectedObject.vraisemblance = inputInfoData.value;
+                modifiedData = null;
                 break;
         
             default:
                 break;
         }
+        inputInfoData.style.display = "none";
+        modifierData.style.display = "none";
         showInfoMenu(selectedObject);
     });
 }
 
+//Fonction permettant de fermer le menu d'information
 function exitMenu() {
     let infoMenu = document.getElementById("infoMenu");
     infoMenu.style.display = "none";
@@ -508,6 +614,7 @@ function exitMenu() {
     selectedArrow = null;
 }
 
+//Fonction permettant de montrer les catégories de carrés dans la bdd (sources de risques, événements redoutés, parties prenantes)
 function showCategoryCarre(str) {
     console.log('change : ' + str);
     var xhttp;
@@ -523,22 +630,22 @@ function showCategoryCarre(str) {
         for (const validerBouton of validerBoutons) {
             validerBouton.addEventListener('click', function() {
                 console.log('index : ' + this.parentNode.parentNode.rowIndex);
-                //Get full information of the selected row
                 var row = this.parentNode.parentNode;
                 var cells = row.getElementsByTagName('td');
-                var id = cells[0].innerHTML;
-                var nom = cells[1].innerHTML;
-                var description = cells[2].innerHTML;
-                console.log('id : ' + id + ', nom : ' + nom + ', description : ' + description);
+                var id = cells[0].innerHTML;                
+                nom = cells[1].innerHTML;
+                //var description = cells[2].innerHTML;
+                console.log('id : ' + id + ', nom : ' + nom);
                 dessinerCarre();
             });
         }
       }
     };
-    xhttp.open("GET", "getcategory.php?category="+str, true);
+    xhttp.open("GET", "ajax_functions/getcategory.php?category="+str, true);
     xhttp.send();
 }
 
+//Fonction permettant de montrer les catégories de flèches dans la bdd (événements intermédiaires)
 function showCategoryArrow() {
     var xhttp;
     document.getElementById("txtHint2").innerHTML = "";
@@ -549,24 +656,25 @@ function showCategoryArrow() {
         var validerBoutons = document.getElementsByClassName('validerTable');
         for (const validerBouton of validerBoutons) {
             validerBouton.addEventListener('click', function() {
-                //Get full information of the selected row
                 var row = this.parentNode.parentNode;
                 var cells = row.getElementsByTagName('td');
                 var id = cells[0].innerHTML;
                 var nom = cells[1].innerHTML;
-                var description = cells[2].innerHTML;
+                //var description = cells[2].innerHTML;
                 selectedObject.id = id;
                 selectedObject.nom = nom;
-                selectedObject.description = description;
+                //selectedObject.description = description;
                 showInfoMenu(selectedObject);
             });
         }
       }
     };
-    xhttp.open("GET", "getcategory.php?category=evements_intermediaires", true);
+    xhttp.open("GET", "ajax_functions/getcategory.php?category=evenements_intermediaires", true);
     xhttp.send();
 }   
 
+
+//Export du diagramme en JSON dans la bdd
 function exportDiagram() {
     var xhttp;
     var data = [];
@@ -579,18 +687,17 @@ function exportDiagram() {
             console.log(this.responseText);
         }
     };
-    xhttp.open("POST", "export.php", true);
+    xhttp.open("POST", "ajax_functions/export.php", true);
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.send("data=" + JSON.stringify(data[0]) + "&data2=" + JSON.stringify(data[1]) + "&data3=" + JSON.stringify(data[2]));
-    //console.log("data=" + JSON.stringify(squares) + "&data2=" + JSON.stringify(arrows) + "&data3=" + JSON.stringify(paths));
 }
 
+//Import du diagramme en JSON dans la bdd
 function importDiagram(id) {
     var xhttp;
     xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            //console.log(this.responseText);
             var data = JSON.parse(this.responseText);
             var dataSquare = data.squares;
             var dataArrow = data.arrows;
@@ -598,11 +705,20 @@ function importDiagram(id) {
             squares = [];
             arrows = [];
             paths = [];
+            //On créé les carrés et les flèches car le JSON leur fait perdre le constructeur Arrow et Square et donc les fonctions qui votn avec
             dataSquare.forEach(element => {
-                squares.push(new Square(element.id, element.x, element.y, element.size, element.color, element.maxInput, element.maxOutput));
+                var square = new Square(element.id, element.x, element.y, element.size, element.color, element.maxInput, element.maxOutput);
+                square.nom = element.nom;
+                square.description = element.description;
+                square.vraisemblance = element.vraisemblance;
+                squares.push(square);
             });
             dataArrow.forEach(element => {
                 var arrow = new Arrow(element.startX, element.startY);
+                arrow.id = element.id;
+                arrow.nom = element.nom;
+                arrow.description = element.description;
+                arrow.vraisemblance = element.vraisemblance;
                 squares.forEach(square => {
                     if (square.id == element.startSquare.id) {
                         arrow.startSquare = square;
@@ -635,7 +751,7 @@ function importDiagram(id) {
             console.log(paths);
         }
     };
-    xhttp.open("GET", "import.php?id="+id, true);
+    xhttp.open("GET", "ajax_functions/import.php?id="+id, true);
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.send();
 };
@@ -652,12 +768,9 @@ function showDiagrams() {
         var validerBoutons = document.getElementsByClassName('validerPath');
         for (const validerBouton of validerBoutons) {
             validerBouton.addEventListener('click', function() {
-                //console.log('index : ' + this.parentNode.parentNode.rowIndex);
-                //Get full information of the selected row
                 var row = this.parentNode.parentNode;
                 var cells = row.getElementsByTagName('td');
                 var id = cells[0].innerHTML;
-                //console.log('id : ' + id + ', nom : ' + nom + ', description : ' + description);
                 document.getElementById("importMenu").style.display = "none";
                 importDiagram(id);                
             });
