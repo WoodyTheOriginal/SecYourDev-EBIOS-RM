@@ -56,4 +56,137 @@ table,th,td {
   border: 1px solid #000;
 }
 
+* {
+  box-sizing: border-box; 
+}
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: row;
+  margin: 0;
+  
+
+}
+
+/* Navigateur */
+.col-1 {
+  background: #282c44;
+  flex: 1;
+  
+}
+
+/* CSS */
+button{
+  background-color: #282c44;
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  height: 30px;
+  line-height: 20px;
+  list-style: none;
+  margin: 0;
+  outline: none;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  transition: color 100ms;
+  vertical-align: baseline;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-1:hover,
+.button-1:focus {
+  background-color: #F082AC;
+}
+
+#logo {
+  font-size: 30px;
+  color: white;
+  font-family: Impact;
+  display: inline-block;
+}
+.col-2 {
+  display: flex;
+  flex-direction: column;
+  flex: 5;
+}
+
+#activite {
+  margin: 3em;
+  background: white;
+  width: 100%;
+
+}
+
+
+.content {
+  display: flex;
+  flex-direction: row;
+  background: #f9f8f8;
+}
+header, footer {
+  background: white;
+  height: 10vh;
+}
+header, footer, article, nav {
+  padding: 1em;
+}
+
+/* display context menu on top of everything else and centered*/
+#contextMenu {
+    position: absolute;
+    display: none;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 40%;
+    width: 20%;
+    border: 1px solid #000;
+}
+
+table,th,td {
+    border : 1px solid black;
+    border-collapse: collapse;
+  }
+  th,td {
+    padding: 5px;
+  }
+
+/*position the menu on the right side of the screen taking full height*/
+#infoMenu {
+    position: absolute;
+    display: none;
+    z-index: 1000;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 20%;
+    border: 1px solid #000;
+}
+
+#menuChemins {
+  position: absolute;
+  display: none;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 20%;
+  border: 1px solid #000;
+}
+
+
+
+
+
+
 

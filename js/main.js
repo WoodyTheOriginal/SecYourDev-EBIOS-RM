@@ -1,154 +1,257 @@
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-var offsetX = 0;
-var offsetY = 0;
-var mouseX;
-var mouseY;
-document.getElementById('chemins').onclick = dessinerChemin;
-document.getElementById('dessin').onclick = dessinerFleche;
-document.getElementById('suppression').onclick = supprimerObjet;
-document.getElementById('valider').onclick = dessinerCarre;
-document.getElementById('findPath').onclick = renderPaths;
-document.getElementById('submit').onclick = showChemin;
-document.getElementById('selectCarre').addEventListener('change', (event) => showCategoryCarre(event.target.value));
-document.getElementById('fermer2').addEventListener('click', () => exitMenu());
+//Importation des classes
+import { Square } from './modules/squares.js';
+import { Arrow } from './modules/arrows.js';
+
+//Récupération des éléments du DOM
+let chemins = document.getElementById('chemins');
+let dessin = document.getElementById('dessin');
+let suppression = document.getElementById('suppression');
+let valider = document.getElementById('valider');
+let findPath = document.getElementById('findPath');
+let submit = document.getElementById('submit');
+let fermer2 = document.getElementById('fermer2');
+let selectCarre = document.getElementById('selectCarre');
+let exportBtn = document.getElementById('export');
+let importBtn = document.getElementById('importButton');
 let creerCarre = document.getElementById('creerCarre');
 let fermer = document.getElementById('fermer');
-document.getElementById('export').addEventListener('click', () => exportDiagram());
-document.getElementById('importButton').addEventListener('click', () => showPaths());
+let afficherCheminsBouton = document.getElementById('afficherChemins');
 
-creerCarre.addEventListener('click', function() {
-    document.getElementById('contextMenu').style.display = 'block';
-});
-
-fermer.addEventListener('click', function() {
-    document.getElementById('contextMenu').style.display = 'none';
-});
-
-var drawingPath = false;
-var drawingTool = false;
-var drawingArrow = false;
-var removingTool = false;
-var drawingSquare = false;
-var squareChoice = null;
-var maxInputChoice = null;
-var maxOutputChoice = null;
-var pathTemp = [];
-var paths = [];
-var adjList = [];
-var selectedObject = null;
-var selectedArrow = null;
-
-var squares = [
-    new Square(0, 100, 100, 50, 'red', -1, -1),
-    new Square(1, 300, 100, 50, 'green', -1, -1),
-    new Square(2, 100, 300, 50, 'blue', -1, -1),
-    new Square(3, 300, 300, 50, 'yellow', -1, -1)
-];
-
-var arrows = [];
-var currentArrow;
-var selectedSquare;
-var points = 0;
-
-function Square(id, x, y, size, color, maxInput, maxOutput) {
-    this.id = id;
-    this.x = x;
-    this.y = y;
-    this.size = size;
-    this.color = color;
-    this.input = 0;
-    this.output = 0;
-    this.maxInput = maxInput;
-    this.maxOutput = maxOutput;
-    this.connections = [];
-    this.nom = null;
-    this.description = null;
-    this.vraisemblance = null;
+//Attribution des onclick aux boutons en vérifiant leur existance pour éviter les erreurs
+if (exists(canvas)) {
+    ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth * 0.85;
+    canvas.height = window.innerHeight * 0.7;
+}
+if (exists(chemins)) {
+    chemins.onclick = dessinerChemin;
+}
+if (exists(dessin)) {
+    dessin.onclick = dessinerFleche;
+}
+if (exists(suppression)) {
+    suppression.onclick = supprimerObjet;
+}if (exists(valider)) {
+    valider.onclick = dessinerCarre;
+}
+if (exists(findPath)) {
+    findPath.onclick = renderPaths;
+}
+if (exists(submit)) {
+    submit.onclick = showChemin;
+}
+if (exists(fermer2)) {
+    fermer2.addEventListener('click', () => exitMenu());
+}
+if (exists(selectCarre)) {
+    selectCarre.addEventListener('change', (event) => showCategoryCarre(event.target.value));
+}
+if (exists(exportBtn)) {
+    exportBtn.addEventListener('click', () => exportDiagram());
+}
+if (exists(importBtn)) {
+    importBtn.addEventListener('click', () => showDiagrams());
+}
+if (exists(creerCarre)) {
+    creerCarre.addEventListener('click', function() {
+        document.getElementById('contextMenu').style.display = 'block';
+    });
+}
+if (exists(fermer)) {
+    fermer.addEventListener('click', function() {
+        document.getElementById('contextMenu').style.display = 'none';
+    });
 }
 
-// Define the draw method for the Square class
-Square.prototype.draw = function() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.size, this.size);
+if (exists(afficherCheminsBouton)) {
+    afficherCheminsBouton.addEventListener('click', () => showPaths());
 }
 
-// Define the containsPoint method for the Square class
-Square.prototype.containsPoint = function(x, y) {
-    return x >= this.x && x <= this.x + this.size && y >= this.y  && y <= this.y + this.size;
-}
+//Fonction qui vérifie l'existence du canvas
+if (exists(canvas)) {
+    //Ajout de tous les event listeners sur le canvas
+    canvas.addEventListener('mousedown', function(e){
 
-// Define the Arrow class
-function Arrow(startX, startY) {
-    this.startX = startX;
-    this.startY = startY;
-    this.endX = startX;
-    this.endY = startY;
-    this.drawing = true;
-    this.startSquare = null;
-    this.endSquare = null;
-    this.color = 'black';
-    this.nom = null;
-    this.description = null;
-    this.vraisemblance = null;
-}
-
-// Define the updateEnd method for the Arrow class
-Arrow.prototype.updateEnd = function(x, y) {
-    this.endX = x;
-    this.endY = y;
-}
-
-Arrow.prototype.updateStart = function(x, y) {
-    this.startX = x;
-    this.startY = y;
-}
-
-// Define the finishDrawing method for the Arrow class
-Arrow.prototype.finishDrawing = function() {
-    this.draw();
-    this.drawing = false;
-}
-
-// Define the draw method for the Arrow class
-Arrow.prototype.draw = function() {
-    var ctx = document.getElementById('canvas').getContext('2d');
-    ctx.strokeStyle = this.color;
-    ctx.beginPath();
-    ctx.moveTo(this.startX, this.startY);
-    ctx.lineTo(this.endX, this.endY);
-    ctx.stroke();
-
-    // Draw the arrow head using a triangle oriented to the end of the arrow
-    var angle = Math.atan2(this.endY - this.startY, this.endX - this.startX);
-    ctx.fillStyle = this.color;
-    ctx.save();
-    ctx.translate(this.endX, this.endY);
-    ctx.rotate(angle);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(-10, -10);
-    ctx.lineTo(-10, 10);
-    ctx.closePath();
-    ctx.restore();
-    ctx.fill();
-}
-
-Arrow.prototype.containsPoint = function(x, y) {
-    var dx = this.endX - this.startX;
-    var dy = this.endY - this.startY;
-    var length = Math.sqrt(dx * dx + dy * dy);
-    var dot = ((x - this.startX) * dx + (y - this.startY) * dy) / length;
-    var closestX = this.startX + dot * dx / length;
-    var closestY = this.startY + dot * dy / length;
-    var onSegment = dot > 0 && dot < length;
-    if (!onSegment) return false;
-    dx = x - closestX;
-    dy = y - closestY;
-    var distance = Math.sqrt(dx * dx + dy * dy);
-    return distance < 10;
+        mouseX = e.pageX - canvas.offsetLeft;
+        mouseY = e.pageY - canvas.offsetTop;
+    
+        for (let i = 0; i < squares.length; i++) {
+            if (squares[i].containsPoint(mouseX, mouseY) === true){
+                if (!drawingTool && !drawingSquare && !removingTool){
+                    selectedSquare = squares[i];
+                    selectedObject = squares[i];
+                    //console.log(selectedSquare + " " + selectedObject);
+                    //console.log(squares);
+                }
+    
+                if (drawingArrow && points === 1){
+                    if (squares[i].input + 1 <= squares[i].maxInput || squares[i].maxInput < 0){
+                        points = 2;
+                        squares[i].input += 1;
+                        //console.log("nombre input : " + squares[i].input);
+                        currentArrow.updateEnd(squares[i].x, squares[i].y + squares[i].size / 2);
+                        currentArrow.endSquare = squares[i];
+                        currentArrow.startSquare.connections.push(squares[i]);
+                    } else {
+                        alert("Pas plus d'entrées");
+                        exitTool();
+                    }
+                }
+    
+                if (drawingTool && points === 0){
+    
+                    if (squares[i].output + 1 <= squares[i].maxOutput || squares[i].maxOutput < 0){
+                        drawingArrow = true;
+                        points = 1;
+                        var newArrow = new Arrow(squares[i].x + squares[i].size, squares[i].y + squares[i].size / 2);
+                        newArrow.startSquare = squares[i];
+                        currentArrow = newArrow;
+                        squares[i].output += 1;
+                        //console.log("nombre output : " + squares[i].output);
+                    } else {
+                        alert("Pas plus de sorties");
+                        exitTool();
+                    }
+                }
+    
+                if (removingTool){
+                    if (squares[i].input === 0 && squares[i].output === 0){
+                        squares.splice(i, 1);
+                        //console.log("suppression");
+                        reassignIds();
+                        drawCanvas();
+                        exitTool();
+                    } else {
+                        alert('Impossible de supprimer une case avec des connexions');
+                        exitTool();
+                    }
+                }
+            }
+        }
+    
+        for (let i = 0; i < arrows.length; i++) {
+            if (arrows[i].containsPoint(mouseX, mouseY)) {
+                selectedArrow = arrows[i];
+                console.log(arrows[i]);
+                if (removingTool){
+                    arrows[i].startSquare.output -= 1;
+                    arrows[i].endSquare.input -= 1;
+                    arrows.splice(i, 1);
+                    drawCanvas();
+                    exitTool();
+                }
+    
+                if (drawingPath) {
+                    arrows[i].color = 'red';
+                    pathTemp[0] = squares[0];
+                    if (arrows[i].startSquare !== pathTemp[pathTemp.length - 1] ) {
+                        console.log("Chemin invalide");
+                        pathTemp = [];
+                        arrows.forEach(arrow => {
+                            arrow.color = 'black';
+                        });
+                        drawCanvas();
+                    }else {
+                        if (arrows[i].startSquare === pathTemp[pathTemp.length - 1]) {
+                            pathTemp.push(arrows[i], arrows[i].endSquare);
+                        }
+                        if (arrows[i].endSquare === (squares[squares.length - 1])){
+                            pathTemp.push(arrows[i]);
+                            mergePaths();
+                        }
+                        else {
+                            pathTemp.push(arrows[i].startSquare, arrows[i], arrows[i].endSquare);
+                        }
+                    }
+                    drawCanvas();
+                    exitTool();
+                }
+    
+                if (!drawingPath && !drawingTool && !removingTool) {
+                    selectedObject = arrows[i];
+                }   
+            }        
+        }
+    
+        if (drawingArrow && points === 2) {
+            currentArrow.finishDrawing();
+            showCategoryArrow();
+            arrows.push(currentArrow);
+            showInfoMenu(currentArrow);
+            currentArrow = null;
+            exitTool();
+        }
+    
+        if (!drawingTool && !drawingSquare && !removingTool && !drawingArrow && !drawingPath && !selectedArrow && !selectedSquare){
+            console.log("exit menu");
+            exitMenu();
+        }
+    
+        if (drawingSquare){
+            var newSquare = new Square(squares.length , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
+            squares.push(newSquare);
+            drawCanvas();
+            exitTool();
+        }
+    })
+    
+    canvas.addEventListener('mousemove', function(e) {
+    
+        mouseX = e.pageX - canvas.offsetLeft;
+        mouseY = e.pageY - canvas.offsetTop;
+    
+        if (selectedSquare && !drawingTool){
+            selectedSquare.x = mouseX - (selectedSquare.size / 2);
+            selectedSquare.y = mouseY - (selectedSquare.size / 2);
+            drawCanvas();
+        }
+    
+        for (let i = 0; i < arrows.length; i++) {
+            arrows[i].updateEnd(arrows[i].endSquare.x, arrows[i].endSquare.y + arrows[i].endSquare.size / 2);
+            arrows[i].updateStart(arrows[i].startSquare.x, arrows[i].startSquare.y + arrows[i].startSquare.size / 2);
+    
+            // Si la flèche pointe vers le haut
+            if (arrows[i].endSquare.y < arrows[i].startSquare.y - (arrows[i].startSquare.size * 1.5)) {
+                arrows[i].updateStart(arrows[i].startSquare.x + arrows[i].startSquare.size / 2, arrows[i].startSquare.y);
+                arrows[i].updateEnd(arrows[i].endSquare.x + arrows[i].endSquare.size / 2, arrows[i].endSquare.y + arrows[i].endSquare.size);
+            }
+    
+            // Si la flèche pointe vers le bas
+            if (arrows[i].endSquare.y > arrows[i].startSquare.y + (arrows[i].startSquare.size * 1.5)) { 
+                arrows[i].updateStart(arrows[i].startSquare.x + arrows[i].startSquare.size / 2, arrows[i].startSquare.y + arrows[i].startSquare.size);
+                arrows[i].updateEnd(arrows[i].endSquare.x + arrows[i].endSquare.size / 2, arrows[i].endSquare.y);
+            }
+    
+            // Si la flèche pointe vers la droite
+            if (arrows[i].endSquare.x < arrows[i].startSquare.x - (arrows[i].startSquare.size * 1.5)) {
+                arrows[i].updateStart(arrows[i].startSquare.x, arrows[i].startSquare.y + arrows[i].startSquare.size / 2);
+                arrows[i].updateEnd(arrows[i].endSquare.x + arrows[i].endSquare.size, arrows[i].endSquare.y + arrows[i].endSquare.size / 2);
+            }
+    
+            // Si la flèche pointe vers la gauche
+            if (arrows[i].endSquare.x > arrows[i].startSquare.x + (arrows[i].startSquare.size * 1.5)) {
+                arrows[i].updateStart(arrows[i].startSquare.x + arrows[i].startSquare.size, arrows[i].startSquare.y + arrows[i].startSquare.size / 2);
+                arrows[i].updateEnd(arrows[i].endSquare.x, arrows[i].endSquare.y + arrows[i].endSquare.size / 2);
+            }
+        }
+    })
+    
+    
+    canvas.addEventListener('mouseup', function(e) {
+    
+        if (selectedObject) {
+            showInfoMenu(selectedObject);
+        }
+    
+        if (selectedSquare) {
+            selectedSquare = null;
+        }
+    
+        if (selectedArrow) {
+            selectedArrow = null;
+        }
+    
+    })
 }
 
 function drawCanvas() {
@@ -206,188 +309,7 @@ function dessinerCarre() {
 }
 
 
-canvas.addEventListener('mousedown', function(e){
 
-    mouseX = e.pageX - canvas.offsetLeft;
-    mouseY = e.pageY - canvas.offsetTop;
-
-    for (let i = 0; i < squares.length; i++) {
-        if (squares[i].containsPoint(mouseX, mouseY) === true){
-            if (!drawingTool && !drawingSquare && !removingTool){
-                selectedSquare = squares[i];
-                selectedObject = squares[i];
-                //console.log(selectedSquare + " " + selectedObject);
-                //console.log(squares);
-            }
-
-            if (drawingArrow && points === 1){
-                if (squares[i].input + 1 <= squares[i].maxInput || squares[i].maxInput < 0){
-                    points = 2;
-                    squares[i].input += 1;
-                    //console.log("nombre input : " + squares[i].input);
-                    currentArrow.updateEnd(squares[i].x, squares[i].y + squares[i].size / 2);
-                    currentArrow.endSquare = squares[i];
-                    currentArrow.startSquare.connections.push(squares[i]);
-                } else {
-                    alert("Pas plus d'entrées");
-                    exitTool();
-                }
-            }
-
-            if (drawingTool && points === 0){
-
-                if (squares[i].output + 1 <= squares[i].maxOutput || squares[i].maxOutput < 0){
-                    drawingArrow = true;
-                    points = 1;
-                    var newArrow = new Arrow(squares[i].x + squares[i].size, squares[i].y + squares[i].size / 2);
-                    newArrow.startSquare = squares[i];
-                    currentArrow = newArrow;
-                    squares[i].output += 1;
-                    //console.log("nombre output : " + squares[i].output);
-                } else {
-                    alert("Pas plus de sorties");
-                    exitTool();
-                }
-            }
-
-            if (removingTool){
-                if (squares[i].input === 0 && squares[i].output === 0){
-                    squares.splice(i, 1);
-                    //console.log("suppression");
-                    reassignIds();
-                    drawCanvas();
-                    exitTool();
-                } else {
-                    alert('Impossible de supprimer une case avec des connexions');
-                    exitTool();
-                }
-            }
-        }
-    }
-
-    for (let i = 0; i < arrows.length; i++) {
-        if (arrows[i].containsPoint(mouseX, mouseY)) {
-            selectedArrow = arrows[i];
-            console.log(arrows[i]);
-            if (removingTool){
-                arrows[i].startSquare.output -= 1;
-                arrows[i].endSquare.input -= 1;
-                arrows.splice(i, 1);
-                drawCanvas();
-                exitTool();
-            }
-
-            if (drawingPath) {
-                arrows[i].color = 'red';
-                pathTemp[0] = squares[0];
-                if (arrows[i].startSquare !== pathTemp[pathTemp.length - 1] ) {
-                    console.log("Chemin invalide");
-                    pathTemp = [];
-                    arrows.forEach(arrow => {
-                        arrow.color = 'black';
-                    });
-                    drawCanvas();
-                }else {
-                    if (arrows[i].startSquare === pathTemp[pathTemp.length - 1]) {
-                        pathTemp.push(arrows[i], arrows[i].endSquare);
-                    }
-                    if (arrows[i].endSquare === (squares[squares.length - 1])){
-                        pathTemp.push(arrows[i]);
-                        mergePaths();
-                    }
-                    else {
-                        pathTemp.push(arrows[i].startSquare, arrows[i], arrows[i].endSquare);
-                    }
-                }
-                drawCanvas();
-                exitTool();
-            }
-
-            if (!drawingPath && !drawingTool && !removingTool) {
-                selectedObject = arrows[i];
-            }   
-        }        
-    }
-
-    if (drawingArrow && points === 2) {
-        currentArrow.finishDrawing();
-        showCategoryArrow();
-        arrows.push(currentArrow);
-        showInfoMenu(currentArrow);
-        currentArrow = null;
-        exitTool();
-    }
-
-    if (!drawingTool && !drawingSquare && !removingTool && !drawingArrow && !drawingPath && !selectedArrow && !selectedSquare){
-        console.log("exit menu");
-        exitMenu();
-    }
-
-    if (drawingSquare){
-        var newSquare = new Square(squares.length , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
-        squares.push(newSquare);
-        drawCanvas();
-        exitTool();
-    }
-})
-
-canvas.addEventListener('mousemove', function(e) {
-
-    mouseX = e.pageX - canvas.offsetLeft;
-    mouseY = e.pageY - canvas.offsetTop;
-
-    if (selectedSquare && !drawingTool){
-        selectedSquare.x = mouseX - (selectedSquare.size / 2);
-        selectedSquare.y = mouseY - (selectedSquare.size / 2);
-        drawCanvas();
-    }
-
-    for (let i = 0; i < arrows.length; i++) {
-        arrows[i].updateEnd(arrows[i].endSquare.x, arrows[i].endSquare.y + arrows[i].endSquare.size / 2);
-        arrows[i].updateStart(arrows[i].startSquare.x, arrows[i].startSquare.y + arrows[i].startSquare.size / 2);
-
-        // Si la flèche pointe vers le haut
-        if (arrows[i].endSquare.y < arrows[i].startSquare.y - (arrows[i].startSquare.size * 1.5)) {
-            arrows[i].updateStart(arrows[i].startSquare.x + arrows[i].startSquare.size / 2, arrows[i].startSquare.y);
-            arrows[i].updateEnd(arrows[i].endSquare.x + arrows[i].endSquare.size / 2, arrows[i].endSquare.y + arrows[i].endSquare.size);
-        }
-
-        // Si la flèche pointe vers le bas
-        if (arrows[i].endSquare.y > arrows[i].startSquare.y + (arrows[i].startSquare.size * 1.5)) { 
-            arrows[i].updateStart(arrows[i].startSquare.x + arrows[i].startSquare.size / 2, arrows[i].startSquare.y + arrows[i].startSquare.size);
-            arrows[i].updateEnd(arrows[i].endSquare.x + arrows[i].endSquare.size / 2, arrows[i].endSquare.y);
-        }
-
-        // Si la flèche pointe vers la droite
-        if (arrows[i].endSquare.x < arrows[i].startSquare.x - (arrows[i].startSquare.size * 1.5)) {
-            arrows[i].updateStart(arrows[i].startSquare.x, arrows[i].startSquare.y + arrows[i].startSquare.size / 2);
-            arrows[i].updateEnd(arrows[i].endSquare.x + arrows[i].endSquare.size, arrows[i].endSquare.y + arrows[i].endSquare.size / 2);
-        }
-
-        // Si la flèche pointe vers la gauche
-        if (arrows[i].endSquare.x > arrows[i].startSquare.x + (arrows[i].startSquare.size * 1.5)) {
-            arrows[i].updateStart(arrows[i].startSquare.x + arrows[i].startSquare.size, arrows[i].startSquare.y + arrows[i].startSquare.size / 2);
-            arrows[i].updateEnd(arrows[i].endSquare.x, arrows[i].endSquare.y + arrows[i].endSquare.size / 2);
-        }
-    }
-})
-
-
-canvas.addEventListener('mouseup', function(e) {
-
-    if (selectedObject) {
-        showInfoMenu(selectedObject);
-    }
-
-    if (selectedSquare) {
-        selectedSquare = null;
-    }
-
-    if (selectedArrow) {
-        selectedArrow = null;
-    }
-
-})
 
 document.addEventListener('keydown', evt => {
     if (evt.key === 'Escape') {
@@ -499,13 +421,12 @@ function showChemin() {
     arrows.forEach(arrow => {
         arrow.color = 'black';
     }); 
-    if (paths.length >= (value) && value > 0){
-        paths[(value - 1)].forEach(arrow => {
-            if (arrow instanceof Arrow){
-                arrow.color = 'green';
-            }
-        });
-    }
+
+    paths[id].forEach(arrow => {
+        if (arrow instanceof Arrow){
+            arrow.color = 'green';
+        }
+    });
     drawCanvas();
 }
 
@@ -719,8 +640,8 @@ function importDiagram(id) {
     xhttp.send();
 };
 
-function showPaths() {
-    //console.log('change : ' + str);
+//Récupération des chemins depuis la base de données
+function showDiagrams() {
     document.getElementById("importMenu").style.display = "block";
     document.getElementById("mainMenu").style.display = "none";
     var xhttp;
@@ -743,8 +664,33 @@ function showPaths() {
         }
       }
     };
-    xhttp.open("GET", "ajax_functions/getpaths.php?", true);
+    xhttp.open("GET", "ajax_functions/getdiagrams.php?", true);
     xhttp.send();
+}
+
+function showPaths() {
+    let menu = document.getElementById("menuChemins");
+    let tableChemins = document.getElementById("tableChemins");
+    menu.style.display = "block";
+    infoMenu.style.display = "none";
+    for (let i = 0; i < paths.length; i++) {
+        let tableCheminsRow = tableChemins.appendChild(document.createElement("tr"));
+        let tableCheminsCellID = tableCheminsRow.appendChild(document.createElement("td"));
+        tableCheminsCellID.innerHTML = i;
+        let tableCheminsCellButton = tableCheminsRow.appendChild(document.createElement("td"));
+        let tableCheminsCellButtonAfficher = tableCheminsCellButton.appendChild(document.createElement("button"));
+        tableCheminsCellButtonAfficher.innerHTML = "Afficher";
+        tableCheminsCellButtonAfficher.className = "afficherCheminTable";
+    }
+    let boutonsAfficherChemin = document.getElementsByClassName("afficherCheminTable");
+    for (const bouton of boutonsAfficherChemin) {
+        bouton.addEventListener('click', function() {
+            let row = this.parentNode.parentNode;
+            let cells = row.getElementsByTagName('td');
+            let id = cells[0].innerHTML;
+            showChemin(id);
+        });
+    }   
 }
 
 drawCanvas();
