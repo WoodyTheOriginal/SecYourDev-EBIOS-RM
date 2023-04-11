@@ -1,6 +1,6 @@
 <?php
 
-$mysqli = new mysqli("localhost", "root", "", "activesaip");
+$mysqli = new mysqli("localhost", "root", "", "secyourdev");
 if ($mysqli->connect_errno) {
     echo "Echec lors de la connexion à MySQL : (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 }
@@ -9,7 +9,7 @@ $squares = $_POST['data'];
 $arrows = $_POST['data2'];
 $paths = $_POST['data3'];
 
-$sql = "INSERT INTO diagramme (squares, arrows, paths) VALUES ('$squares', '$arrows', '$paths')";
+$sql = "INSERT INTO diagramme (squares, arrow, path) VALUES ('$squares', '$arrows', '$paths')";
 
 $stmt = $mysqli->query($sql);
 
