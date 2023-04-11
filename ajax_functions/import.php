@@ -1,20 +1,20 @@
 <?php
 
-$mysqli = new mysqli("localhost", "root", "", "activesaip");
+$mysqli = new mysqli("localhost", "root", "", "secyourdev");
 if ($mysqli->connect_errno) {
     echo "Echec lors de la connexion à MySQL : (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 }
 
 $id = $_GET['id'];
 
-$sql = "SELECT squares, arrows, paths FROM diagramme WHERE id = $id";
+$sql = "SELECT squares, arrow, path FROM diagramme WHERE id = $id";
 
 $stmt = $mysqli->query($sql);
 
 while ($row = $stmt->fetch_assoc()) {
     $squares = $row['squares'];
-    $arrows = $row['arrows'];
-    $paths = $row['paths'];
+    $arrows = $row['arrow'];
+    $paths = $row['path'];
 }
 
 $squaresJSON = json_decode($squares);
