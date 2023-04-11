@@ -89,6 +89,9 @@ if (exists(fermer)) {
         document.getElementById('contextMenu').style.display = 'none';
     });
 }
+if (exists(afficherCheminsBouton)) {
+    afficherCheminsBouton.addEventListener('click', () => showPaths());
+}
 
 //Fonction qui vérifie l'existence du canvas
 if (exists(canvas)) {
@@ -285,60 +288,6 @@ if (exists(canvas)) {
     })
 }
 
-function drawCanvas() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-		// Draw the squares
-		squares.forEach(function(square) {
-			square.draw();
-		});
-		
-		// Draw the current arrow if there is one
-		if (currentArrow) {
-			currentArrow.draw();
-		}
-
-        arrows.forEach(function(arrow) {
-            arrow.draw();
-        });
-}
-
-function dessinerFleche() {
-    document.body.style.cursor = 'crosshair';
-    drawingTool = true;
-
-}
-
-function supprimerObjet() {
-    document.body.style.cursor = 'crosshair';
-    removingTool = true;
-}
-
-function dessinerCarre() {
-    document.body.style.cursor = 'crosshair';
-    document.getElementById('contextMenu').style.display = 'none';
-    drawingSquare = true;
-    squareChoice = document.getElementById('selectCarre').value;
-    switch (squareChoice) {
-        case 'partie_prenantes':
-            maxInputChoice = 0;
-            maxOutputChoice = -1;
-            break;
-
-        case 'evements_intermediaires':
-            maxInputChoice = -1;
-            maxOutputChoice = -1;
-            break;
-
-        case 'evements_redoutes':
-            maxInputChoice = -1;
-            maxOutputChoice = 0;
-            break;
-
-        default:
-            break;
-    }
-}
-
 //Echap permet de quitter les outils de dessin, suppression, etc
 document.addEventListener('keydown', evt => {
     if (evt.key === 'Escape') {
@@ -519,8 +468,7 @@ function mergePaths() {
 }
 
 //Afficher les chemins en mettant les flèches en vert
-function showChemin() {
-    let value = document.getElementById("showChemin").value;
+function showChemin(id) {
     arrows.forEach(arrow => {
         arrow.color = 'black';
     }); 
