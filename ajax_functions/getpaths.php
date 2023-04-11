@@ -1,12 +1,12 @@
 <?php
 
-$mysqli = new mysqli("localhost", "root", "", "activesaip");
+$mysqli = new mysqli("localhost", "root", "", "secyourdev");
 if ($mysqli->connect_errno) {
     echo "Echec lors de la connexion à MySQL : (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 }
 
 
-$sql = "SELECT id, paths description FROM diagramme";
+$sql = "SELECT id, path description FROM diagramme";
 
 $stmt = $mysqli->query($sql);
 
