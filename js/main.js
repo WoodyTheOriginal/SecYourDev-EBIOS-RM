@@ -223,6 +223,7 @@ if (exists(canvas)) {
             var newSquare = new Square(squares.length , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
             newSquare.nom = nom;
             squares.push(newSquare);
+            reassignIds();
             drawCanvas();
             exitTool();
         }
@@ -271,20 +272,16 @@ if (exists(canvas)) {
     })
     
     
-    canvas.addEventListener('mouseup', function(e) {
-    
+    canvas.addEventListener('mouseup', function(e) {    
         if (selectedObject) {
             showInfoMenu(selectedObject);
-        }
-    
+        }    
         if (selectedSquare) {
             selectedSquare = null;
-        }
-    
+        }    
         if (selectedArrow) {
             selectedArrow = null;
-        }
-    
+        }    
     })
 }
 
@@ -366,25 +363,26 @@ function renderPaths() {
 // Reaffecter les id des carrés
 function reassignIds() {
     for (let i = 0; i < squares.length; i++) {
+        if (squares[i].maxInput == -1 && squares[i].maxOutput == 0) {
+            squares.push(squares.splice(i, 1)[0]);
+        }
         squares[i].id = i;
     }
 }
 
 function drawCanvas() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-		// Dessiner les carrés
-		squares.forEach(function(square) {
-			square.draw(ctx);
-		});
-		
-		// Dessiner les flèches si elles existent
-		if (currentArrow) {
-			currentArrow.draw(ctx);
-		}
-
-        arrows.forEach(function(arrow) {
-            arrow.draw(ctx);
-        });
+    // Dessiner les carrés
+    squares.forEach(function(square) {
+        square.draw(ctx);
+    });		
+    // Dessiner les flèches si elles existent
+    if (currentArrow) {
+        currentArrow.draw(ctx);
+    }
+    arrows.forEach(function(arrow) {
+        arrow.draw(ctx);
+    });
 }
 
 //Vérifier qu'un objet du DOM existe
@@ -564,7 +562,7 @@ function exitMenu() {
 
 //Fonction permettant de montrer les catégories de carrés dans la bdd (sources de risques, événements redoutés, parties prenantes)
 function showCategoryCarre(str) {
-    console.log('change : ' + str);
+    //console.log('change : ' + str);
     var xhttp;
     if (str == "") {
       document.getElementById("txtHint").innerHTML = "";
@@ -577,13 +575,13 @@ function showCategoryCarre(str) {
         var validerBoutons = document.getElementsByClassName('validerTable');
         for (const validerBouton of validerBoutons) {
             validerBouton.addEventListener('click', function() {
-                console.log('index : ' + this.parentNode.parentNode.rowIndex);
+                //console.log('index : ' + this.parentNode.parentNode.rowIndex);
                 var row = this.parentNode.parentNode;
                 var cells = row.getElementsByTagName('td');
                 var id = cells[0].innerHTML;                
                 nom = cells[1].innerHTML;
                 //var description = cells[2].innerHTML;
-                console.log('id : ' + id + ', nom : ' + nom);
+                //console.log('id : ' + id + ', nom : ' + nom);
                 dessinerCarre();
             });
         }
