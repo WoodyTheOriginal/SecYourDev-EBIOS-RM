@@ -42,6 +42,7 @@ let exportBtn = document.getElementById('export');
 let importBtn = document.getElementById('importButton');
 let creerCarre = document.getElementById('creerCarre');
 let fermer = document.getElementById('fermer');
+let afficherCheminsBouton = document.getElementById('afficherChemins');
 
 //Attribution des onclick aux boutons en vérifiant leur existance pour éviter les erreurs
 if (exists(canvas)) {
@@ -76,7 +77,7 @@ if (exists(exportBtn)) {
     exportBtn.addEventListener('click', () => exportDiagram());
 }
 if (exists(importBtn)) {
-    importBtn.addEventListener('click', () => showPaths());
+    importBtn.addEventListener('click', () => showDiagrams());
 }
 if (exists(creerCarre)) {
     creerCarre.addEventListener('click', function() {
@@ -87,6 +88,9 @@ if (exists(fermer)) {
     fermer.addEventListener('click', function() {
         document.getElementById('contextMenu').style.display = 'none';
     });
+}
+if (exists(afficherCheminsBouton)) {
+    afficherCheminsBouton.addEventListener('click', () => showPaths());
 }
 
 //Fonction qui vérifie l'existence du canvas
@@ -284,7 +288,6 @@ if (exists(canvas)) {
     })
 }
 
-
 //Echap permet de quitter les outils de dessin, suppression, etc
 document.addEventListener('keydown', evt => {
     if (evt.key === 'Escape') {
@@ -465,18 +468,16 @@ function mergePaths() {
 }
 
 //Afficher les chemins en mettant les flèches en vert
-function showChemin() {
-    let value = document.getElementById("showChemin").value;
+function showChemin(id) {
     arrows.forEach(arrow => {
         arrow.color = 'black';
     }); 
-    if (paths.length >= (value) && value > 0){
-        paths[(value - 1)].forEach(arrow => {
-            if (arrow instanceof Arrow){
-                arrow.color = 'green';
-            }
-        });
-    }
+
+    paths[id].forEach(arrow => {
+        if (arrow instanceof Arrow){
+            arrow.color = 'green';
+        }
+    });
     drawCanvas();
 }
 
@@ -704,7 +705,7 @@ function importDiagram(id) {
 };
 
 //Récupération des chemins depuis la base de données
-function showPaths() {
+function showDiagrams() {
     document.getElementById("importMenu").style.display = "block";
     document.getElementById("mainMenu").style.display = "none";
     var xhttp;
@@ -724,8 +725,33 @@ function showPaths() {
         }
       }
     };
-    xhttp.open("GET", "ajax_functions/getpaths.php?", true);
+    xhttp.open("GET", "ajax_functions/getdiagrams.php?", true);
     xhttp.send();
+}
+
+function showPaths() {
+    let menu = document.getElementById("menuChemins");
+    let tableChemins = document.getElementById("tableChemins");
+    menu.style.display = "block";
+    infoMenu.style.display = "none";
+    for (let i = 0; i < paths.length; i++) {
+        let tableCheminsRow = tableChemins.appendChild(document.createElement("tr"));
+        let tableCheminsCellID = tableCheminsRow.appendChild(document.createElement("td"));
+        tableCheminsCellID.innerHTML = i;
+        let tableCheminsCellButton = tableCheminsRow.appendChild(document.createElement("td"));
+        let tableCheminsCellButtonAfficher = tableCheminsCellButton.appendChild(document.createElement("button"));
+        tableCheminsCellButtonAfficher.innerHTML = "Afficher";
+        tableCheminsCellButtonAfficher.className = "afficherCheminTable";
+    }
+    let boutonsAfficherChemin = document.getElementsByClassName("afficherCheminTable");
+    for (const bouton of boutonsAfficherChemin) {
+        bouton.addEventListener('click', function() {
+            let row = this.parentNode.parentNode;
+            let cells = row.getElementsByTagName('td');
+            let id = cells[0].innerHTML;
+            showChemin(id);
+        });
+    }   
 }
 
 drawCanvas();

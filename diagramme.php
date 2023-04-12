@@ -27,7 +27,7 @@
                         <button id="creerCarre">Créer un carré</button>
                         <button id="suppression">Supprimer élément</button>
                         <button id="dessin">Dessiner des flèches</button>
-                        <!--<button id="findPath">Afficher chemins</button>  -->
+                        <button id="afficherChemins">Afficher chemins</button>
                         <button id="chemins">Dessiner chemins</button>  
                         <!--<input type="text" id="showChemin" placeholder="ID"/>
                         <button id='submit'>Submit</button>-->
@@ -78,6 +78,18 @@
                 <div id='mainMenu' style='display: none'>
                     <a href="diagramme.php"><button>Nouveau Diagramme</button></a>
                     <button id="importButton">Importer</button>
+                </div>
+
+                <div id='menuChemins'>
+                    <h3>Chemins</h3>
+                    <table>
+                        <tbody id='tableChemins'>
+                            <tr>
+                                <th>ID</th>
+                                <th></th>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div id='importMenu'>            
