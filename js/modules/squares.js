@@ -18,6 +18,12 @@ export function Square(id, x, y, size, color, maxInput, maxOutput) {
 Square.prototype.draw = function(ctx) {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.size, this.size);
+    // If nom is not null, draw the nom outside the square
+    if (this.nom !== null) {
+        ctx.fillStyle = "black";
+        ctx.font = "10px Arial";
+        ctx.fillText(this.nom, this.x + this.size + 5, this.y + 10);
+    }
 }
 
 // Define the containsPoint method for the Square class
