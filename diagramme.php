@@ -50,8 +50,8 @@
                     </div>
                         <select id="selectCarre" name="typeCarre" class="form-select">
                         <option value="sources_de_risques" selected>Sources de risques</option>
-                            <option value="partie_prenante">Parties Prenantes</option>
-                            <option value="evenements_redoutes">Evénements redoutés</option>
+                        <option value="partie_prenante">Parties Prenantes</option>
+                        <option value="valeur_metier">Valeur métier</option>
                         </select>
                         </div>
                         <div class="card-body">
