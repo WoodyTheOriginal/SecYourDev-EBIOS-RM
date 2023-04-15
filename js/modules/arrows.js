@@ -51,6 +51,13 @@ Arrow.prototype.draw = function(ctx) {
     ctx.closePath();
     ctx.restore();
     ctx.fill();
+
+    // If nom is not null, draw the nom outside the arrow around the middle
+    if (this.nom !== null) {
+        ctx.fillStyle = "black";
+        ctx.font = "10px Arial";
+        ctx.fillText(this.nom, (this.startX + this.endX) / 2, (this.startY + this.endY) / 2);
+    }
 }
 
 Arrow.prototype.containsPoint = function(x, y) {
