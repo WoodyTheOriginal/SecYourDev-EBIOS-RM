@@ -40,9 +40,9 @@
         <div id="contextMenu">
             <h3>Menu</h3>
             <select name="typeCarre" id="selectCarre">
-                <option value="source_de_risque" selected>source_de_risque</option>
-                <option value="partie_prenante">partie_prenante</option>
-                <option value="valeur_metier">valeur_metier</option>
+                <option value="partie_prenantes" selected>Partie prenante</option>
+                <option value="evements_intermediaires">Evémenent intermédiaire</option>
+                <option value="evements_redoutes">Evénement redouté</option>
             </select>
             <button id="valider">Valider</button>
             <div id="txtHint">
