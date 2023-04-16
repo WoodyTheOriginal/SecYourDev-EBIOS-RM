@@ -24,15 +24,16 @@
             <main class="content">
                 <div id="activite">
                     <div class="toolbar">
+                        <!--
                         <button id="creerCarre">Créer un carré</button>
                         <button id="suppression">Supprimer élément</button>
                         <button id="dessin">Dessiner des flèches</button>
                         <button id="afficherChemins">Afficher chemins</button>
                         <button id="chemins">Dessiner chemins</button>  
-                        <!--<input type="text" id="showChemin" placeholder="ID"/>
+                        <input type="text" id="showChemin" placeholder="ID"/>
                         <button id='submit'>Submit</button>-->
                         <button id='importButton'>Importer</button>
-                        <button id="export">Sauvegarder diagramme</button> 
+                        <!--<button id="export">Sauvegarder diagramme</button>-->
                         <div id="txtHint3">
                         </div> 
                     </div>
@@ -90,7 +91,6 @@
                             </tr>
                         </tbody>
                     </table>
-                    <button id='fermerChemins'>Fermer</button>
                 </div>
 
                 <div id='importMenu'>            
@@ -106,5 +106,3 @@
 
        <!-- <?php include 'footer.php' ; ?>-->
 </html>
-
-
