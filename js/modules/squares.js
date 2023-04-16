@@ -24,7 +24,9 @@ Square.prototype.draw = function(ctx) {
         ctx.font = "12px Arial";
         ctx.textAlign = "center";
         ctx.fillText(this.nom, this.x + this.size / 2, this.y + this.size + 15);
+
     }
+
 }
 
 // Define the containsPoint method for the Square class

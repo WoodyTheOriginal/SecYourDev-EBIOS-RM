@@ -84,6 +84,7 @@ if (exists(creerCarre)) {
     creerCarre.addEventListener('click', function() {
         document.getElementById('contextMenu').style.display = 'block';
     });
+//    creerCarre.addEventListener('change', (event) => showCategoryCarre(event.target.value));
 }
 if (exists(fermer)) {
     fermer.addEventListener('click', function() {
@@ -430,6 +431,7 @@ function dessinerCarre() {
     document.body.style.cursor = 'crosshair';
     document.getElementById('contextMenu').style.display = 'none';
     drawingSquare = true;
+    console.log("IN ?");
     squareChoice = document.getElementById('selectCarre').value;
     //Définition du nombre d'outputs et inputs en fonction du type de carré
     switch (squareChoice) {
@@ -604,7 +606,7 @@ function showCategoryCarre(str) {
                 var id = cells[0].innerHTML;                
                 nom = cells[1].innerHTML;
                 //var description = cells[2].innerHTML;
-                //console.log('id : ' + id + ', nom : ' + nom);
+                console.log('id : ' + id + ', nom : ' + nom);
                 dessinerCarre();
             });
         }
