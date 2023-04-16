@@ -104,6 +104,7 @@
                         <tbody id='tableChemins'>
                         </tbody>
                     </table>
+                    <button id='fermerChemins'>Fermer</button>
                 </div>
 
                 <div id='importMenu'>            

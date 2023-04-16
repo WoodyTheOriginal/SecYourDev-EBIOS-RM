@@ -18,13 +18,13 @@ export function Square(id, x, y, size, color, maxInput, maxOutput) {
 Square.prototype.draw = function(ctx) {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.size, this.size);
-    // If nom is not null, draw the nom outside the square
+    // If nom is not null, draw the nom outside the square at the bottom centered
     if (this.nom !== null) {
-/*    ctx.fillStyle = "black";
-        ctx.font = "10px Arial";
-        ctx.fillText(this.nom, this.x + this.size + 5, this.y + 10); */
-        //
-        ctx.innerHTML = ""
+        ctx.fillStyle = "black";
+        ctx.font = "12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(this.nom, this.x + this.size / 2, this.y + this.size + 15);
+
     }
 
 }

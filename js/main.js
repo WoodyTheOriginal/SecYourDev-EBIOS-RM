@@ -43,6 +43,7 @@ let importBtn = document.getElementById('importButton');
 let creerCarre = document.getElementById('creerCarre');
 let fermer = document.getElementById('fermer');
 let afficherCheminsBouton = document.getElementById('afficherChemins');
+let fermerChemins = document.getElementById('fermerChemins');
 
 //Attribution des onclick aux boutons en vérifiant leur existance pour éviter les erreurs
 if (exists(canvas)) {
@@ -93,6 +94,10 @@ if (exists(fermer)) {
 if (exists(afficherCheminsBouton)) {
     afficherCheminsBouton.addEventListener('click', () => showPaths());
 }
+if (exists(fermerChemins)) {
+    fermerChemins.addEventListener('click', () => exitMenu());
+}
+
 
 //Fonction qui vérifie l'existence du canvas
 if (exists(canvas)) {
@@ -185,6 +190,7 @@ if (exists(canvas)) {
                             arrow.color = 'black';
                         });
                         drawCanvas();
+                        exitTool();
                     }else {
                         if (arrows[i].startSquare === pathTemp[pathTemp.length - 1]) {
                             pathTemp.push(arrows[i], arrows[i].endSquare);
@@ -200,17 +206,17 @@ if (exists(canvas)) {
                                         arrow.color = 'black';
                                     });
                                     drawCanvas();
-                                    drawingPath = false;
+                                    exitTool();
                                 }                                
                             }
                             mergePaths();
+                            exitTool();
                         }
                         else {
                             pathTemp.push(arrows[i].startSquare, arrows[i], arrows[i].endSquare);
                         }
                     }
                     drawCanvas();
-                    exitTool();
                 }
     
                 if (!drawingPath && !drawingTool && !removingTool) {
@@ -570,6 +576,10 @@ function showInfoMenu(object) {
 //Fonction permettant de fermer le menu d'information
 function exitMenu() {
     let infoMenu = document.getElementById("infoMenu");
+    let menuChemins = document.getElementById("menuChemins");
+    if (exists(menuChemins)) {
+        menuChemins.style.display = "none";
+    }
     infoMenu.style.display = "none";
     selectedObject = null;
     selectedArrow = null;
@@ -709,7 +719,6 @@ function importDiagram(id) {
                 pathTemp = [];
             });
             drawCanvas();
-            console.log(paths);
         }
     };
     xhttp.open("GET", "ajax_functions/import.php?id="+id, true);
@@ -717,7 +726,7 @@ function importDiagram(id) {
     xhttp.send();
 };
 
-//Récupération des chemins depuis la base de données
+//Récupération des diagrammes depuis la base de données
 function showDiagrams() {
     document.getElementById("importMenu").style.display = "block";
     document.getElementById("mainMenu").style.display = "none";
@@ -747,6 +756,7 @@ function showPaths() {
     let tableChemins = document.getElementById("tableChemins");
     menu.style.display = "block";
     infoMenu.style.display = "none";
+    tableChemins.innerHTML = "";
     for (let i = 0; i < paths.length; i++) {
         let tableCheminsRow = tableChemins.appendChild(document.createElement("tr"));
         let tableCheminsCellID = tableCheminsRow.appendChild(document.createElement("td"));
@@ -765,28 +775,6 @@ function showPaths() {
             showChemin(id);
         });
     }   
-}
-
-// Function definition with passing two arrays
-function pathAlreadyExists(array1, array2) {        
-    // Loop for array1
-    for(let i = 0; i < array1.length; i++) {
-            
-        // Loop for array2
-        for(let j = 0; j < array2.length; j++) {
-                
-            // Compare the element of each and
-            // every element from both of the
-            // arrays
-            if(array1[i] === array2[j]) {
-                
-                // Return if common element found
-                return true;
-            }
-        }
-    }        
-    // Return if no common element exist
-    return false;
 }
 
 drawCanvas();
