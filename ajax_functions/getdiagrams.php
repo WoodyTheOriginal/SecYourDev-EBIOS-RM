@@ -10,15 +10,15 @@ $sql = "SELECT id, path description FROM diagramme";
 
 $stmt = $mysqli->query($sql);
 
-echo "<table>";
+echo "<table class='table'>";
 echo "<tr>";
-echo "<th>ID</th>";
-echo "<th></th>";
+echo "<th scope='col'>ID</th>";
+echo "<th scope='col'></th>";
 echo "</tr>";
 while ($row = $stmt->fetch_assoc()) {
     echo "<tr>";
     echo "<td>" . $row['id'] . "</td>";
-    echo "<td><button class='validerPath'>Valider</button></td>";
+    echo "<td><button class='validerPath btn btn-primary click'>Valider</button></td>";
     echo "</tr>";
 }
 echo "</table>";

@@ -7,7 +7,7 @@
         <title>Diagramme</title>
         <link href="css/style.css" rel="stylesheet" type="text/css">
     <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
         <?php //  include 'header.php' ; ?>
     </head>
 
@@ -27,23 +27,16 @@
         <button type="button" id="importButton" class="btn btn-secondary click">Importer</button>
         <button type="button" id="export" class="btn btn-secondary click">Sauvegarder diagramme</button>
         <div id="txtHint3">
+        </div>
+        </div>
+        <div>
         <canvas id="canvas"></canvas>
-      </ul>
-
         </div>
 
-        </nav>
-
- 
-        <div class="col-2">
-            <header></header>
-            <script type='module' src="js/main.js"></script>
+             <script type='module' src="js/main.js"></script>
 
             <main class="content">
-                
-            <!-- TEST GRAPHIQUE -->
-
-                <div id="contextMenu" class="card mb-4 box-shadow">
+                <div id="contextMenu" class="card mb-4 box-shadow d-none">
                     <div class="card-header bg-secondary">
                     <div class="d-flex justify-content-center">
                         <h3>Menu</h3>
@@ -51,31 +44,30 @@
                         <select id="selectCarre" name="typeCarre" class="form-select">
                         <option value="sources_de_risques" selected>Sources de risques</option>
                         <option value="partie_prenante">Parties Prenantes</option>
-                        <option value="valeur_metier">Valeur métier</option>
+                        <option value="evenements_redoutes">Evénements redoutés</option>
                         </select>
                         </div>
                         <div class="card-body">
                             <div class="d-flex justify-content-center align-self-center">
-                                <div class="col" align="center"> <button class="btn btn-dark" id="valider">Valider</button></div>
+                                <!--<div class="col" align="center"> <button class="btn btn-dark" id="valider">Valider</button></div>-->
+                                <div id="txtHint"></div>
                                 <div class="col" align="center"><button class="btn btn-dark" id="fermer">Fermer</button></div>
                             </div>
                         </div>
-    <!--                    <button id="valider">Valider</button>
+                        <!--<button id="valider">Valider</button>
                         <div id="txtHint">
                         </div>
                         <button id="fermer">Fermer</button>-->
                 </div>
-
-
                 
-                <div id="infoMenu">
-                    <h3>Informations</h3>
-                    <table>
+                <div id="infoMenu" class="card mb-4 box-shadow d-none">
+                    <h3 class='h3'>Informations</h3>
+                    <table class='table'>
                         <tr>
-                            <th>ID</th>
-                            <th>Nom</th>
-                            <th>Description</th>
-                            <th>Vraisemblance</th>
+                            <th scope='col'>ID</th>
+                            <th scope='col'>Nom</th>
+                            <th scope='col'>Description</th>
+                            <th scope='col'>Vraisemblance</th>
                         </tr>
                         <tr id="infoMenuList">
                         </tr>
@@ -88,12 +80,12 @@
                     <button id="fermer2">Fermer</button>
                 </div>
 
-                <div id='mainMenu' style='display: none'>
+                <div id='mainMenu' class="d-none">
                     <a href="diagramme.php"><button>Nouveau Diagramme</button></a>
                     <button id="importButton">Importer</button>
                 </div>
 
-                <div id="menuChemins" class="card mb-4 box-shadow">
+                <div id="menuChemins" class="card mb-4 box-shadow d-none">
                     <div class="card-header bg-secondary">
                     <div class="d-flex justify-content-center">
                         <h3>Menu</h3>
@@ -106,15 +98,11 @@
                     </table>
                     <button id='fermerChemins'>Fermer</button>
                 </div>
-
-                <div id='importMenu'>            
                 </div>
 
-
-
-    <!--  Fin TEST GRAPHIQUE -->
+                <div id='importMenu' class="card mb-4 box-shadow d-none">            
+                </div>
         </main>
-    </div> 
 
     </body>
 

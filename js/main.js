@@ -44,12 +44,13 @@ let creerCarre = document.getElementById('creerCarre');
 let fermer = document.getElementById('fermer');
 let afficherCheminsBouton = document.getElementById('afficherChemins');
 let fermerChemins = document.getElementById('fermerChemins');
+let contextMenu = document.getElementById('contextMenu');
 
 //Attribution des onclick aux boutons en vérifiant leur existance pour éviter les erreurs
 if (exists(canvas)) {
     ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth * 0.85;
-    canvas.height = window.innerHeight * 0.7;
+    canvas.width = window.innerWidth * 0.7;
+    canvas.height = window.innerHeight * 0.8;
 }
 if (exists(chemins)) {
     chemins.onclick = dessinerChemin;
@@ -82,13 +83,13 @@ if (exists(importBtn)) {
 }
 if (exists(creerCarre)) {
     creerCarre.addEventListener('click', function() {
-        document.getElementById('contextMenu').style.display = 'block';
+        afficher(contextMenu, true);
     });
 //    creerCarre.addEventListener('change', (event) => showCategoryCarre(event.target.value));
 }
 if (exists(fermer)) {
     fermer.addEventListener('click', function() {
-        document.getElementById('contextMenu').style.display = 'none';
+        afficher(contextMenu, false);
     });
 }
 if (exists(afficherCheminsBouton)) {
@@ -207,6 +208,7 @@ if (exists(canvas)) {
                                     });
                                     drawCanvas();
                                     exitTool();
+                                    drawingPath = false;
                                 }                                
                             }
                             mergePaths();
@@ -217,6 +219,7 @@ if (exists(canvas)) {
                         }
                     }
                     drawCanvas();
+                    //exitTool();
                 }
     
                 if (!drawingPath && !drawingTool && !removingTool) {
@@ -429,7 +432,7 @@ function supprimerObjet() {
 //Outil dessin de carré
 function dessinerCarre() {
     document.body.style.cursor = 'crosshair';
-    document.getElementById('contextMenu').style.display = 'none';
+    afficher(contextMenu, false);
     drawingSquare = true;
     console.log("IN ?");
     squareChoice = document.getElementById('selectCarre').value;
@@ -506,12 +509,12 @@ function showInfoMenu(object) {
     let inputInfoData = document.getElementById("inputInfoData");
     let modifierData = document.getElementById("modifierData");
     let modifiedData = null;
-    infoMenu.style.display = "block";
+    afficher(infoMenu, true);
     infoMenuList.innerHTML = "";
-    infoMenuList.innerHTML += "<td>id : " + object.id + " <button class='modifierInfoMenu'>Modifier</button> </td>";
-    infoMenuList.innerHTML += "<td>nom : " + object.nom + " <button class='modifierInfoMenu'>Modifier</button></td>";  
-    infoMenuList.innerHTML += "<td>description : " + object.description + " <button class='modifierInfoMenu'>Modifier</button></td>";
-    infoMenuList.innerHTML += "<td>vraisemblance : " + object.vraisemblance + " <button class='modifierInfoMenu'>Modifier</button></td>";
+    infoMenuList.innerHTML += "<td>id : " + object.id + " <button class='modifierInfoMenu btn btn-primary click'>Modifier</button> </td>";
+    infoMenuList.innerHTML += "<td>nom : " + object.nom + " <button class='modifierInfoMenu btn btn-primary click'>Modifier</button></td>";  
+    infoMenuList.innerHTML += "<td>description : " + object.description + " <button class='modifierInfoMenu btn btn-primary click'>Modifier</button></td>";
+    infoMenuList.innerHTML += "<td>vraisemblance : " + object.vraisemblance + " <button class='modifierInfoMenu btn btn-primary click'>Modifier</button></td>";
     let infoMenuButtons = document.getElementsByClassName("modifierInfoMenu");
     for (const button of infoMenuButtons) {
         button.addEventListener('click', function(e) {
@@ -577,10 +580,17 @@ function showInfoMenu(object) {
 function exitMenu() {
     let infoMenu = document.getElementById("infoMenu");
     let menuChemins = document.getElementById("menuChemins");
-    if (exists(menuChemins)) {
-        menuChemins.style.display = "none";
+    let importMenu = document.getElementById("importMenu");
+    if (exists(contextMenu)) {
+        afficher(contextMenu, false);
     }
-    infoMenu.style.display = "none";
+    if (exists(importMenu)) {
+        afficher(importMenu, false);
+    }
+    if (exists(menuChemins)) {
+        afficher(menuChemins, false);
+    }
+    afficher(infoMenu, false);
     selectedObject = null;
     selectedArrow = null;
 }
@@ -597,7 +607,7 @@ function showCategoryCarre(str) {
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         document.getElementById("txtHint").innerHTML = this.responseText;
-        var validerBoutons = document.getElementsByClassName('validerTable');
+        var validerBoutons = document.getElementsByClassName('validerTableContextMenu');
         for (const validerBouton of validerBoutons) {
             validerBouton.addEventListener('click', function() {
                 //console.log('index : ' + this.parentNode.parentNode.rowIndex);
@@ -624,7 +634,7 @@ function showCategoryArrow() {
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         document.getElementById("txtHint2").innerHTML = this.responseText;
-        var validerBoutons = document.getElementsByClassName('validerTable');
+        var validerBoutons = document.getElementsByClassName('validerTableContextMenu');
         for (const validerBouton of validerBoutons) {
             validerBouton.addEventListener('click', function() {
                 var row = this.parentNode.parentNode;
@@ -634,6 +644,7 @@ function showCategoryArrow() {
                 //var description = cells[2].innerHTML;
                 selectedObject.id = id;
                 selectedObject.nom = nom;
+                console.log((selectedObject.id + " " + selectedObject.nom));
                 //selectedObject.description = description;
                 showInfoMenu(selectedObject);
             });
@@ -728,8 +739,13 @@ function importDiagram(id) {
 
 //Récupération des diagrammes depuis la base de données
 function showDiagrams() {
-    document.getElementById("importMenu").style.display = "block";
-    document.getElementById("mainMenu").style.display = "none";
+    exitMenu();
+    let importMenu = document.getElementById("importMenu");
+    let mainMenu = document.getElementById("mainMenu");
+    let menuChemins = document.getElementById("menuChemins");
+    afficher(importMenu, true);
+    afficher(mainMenu, false);
+    afficher(menuChemins, false);
     var xhttp;
     xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
@@ -741,7 +757,7 @@ function showDiagrams() {
                 var row = this.parentNode.parentNode;
                 var cells = row.getElementsByTagName('td');
                 var id = cells[0].innerHTML;
-                document.getElementById("importMenu").style.display = "none";
+                afficher(importMenu, false);
                 importDiagram(id);                
             });
         }
@@ -754,8 +770,9 @@ function showDiagrams() {
 function showPaths() {
     let menu = document.getElementById("menuChemins");
     let tableChemins = document.getElementById("tableChemins");
-    menu.style.display = "block";
-    infoMenu.style.display = "none";
+    tableChemins.className = "table table-striped";
+    afficher(menu, true);
+    afficher(infoMenu, false);
     tableChemins.innerHTML = "";
     for (let i = 0; i < paths.length; i++) {
         let tableCheminsRow = tableChemins.appendChild(document.createElement("tr"));
@@ -764,7 +781,7 @@ function showPaths() {
         let tableCheminsCellButton = tableCheminsRow.appendChild(document.createElement("td"));
         let tableCheminsCellButtonAfficher = tableCheminsCellButton.appendChild(document.createElement("button"));
         tableCheminsCellButtonAfficher.innerHTML = "Afficher";
-        tableCheminsCellButtonAfficher.className = "afficherCheminTable";
+        tableCheminsCellButtonAfficher.className = "afficherCheminTable btn btn-primary click";
     }
     let boutonsAfficherChemin = document.getElementsByClassName("afficherCheminTable");
     for (const bouton of boutonsAfficherChemin) {
@@ -775,6 +792,16 @@ function showPaths() {
             showChemin(id);
         });
     }   
+}
+
+function afficher(domElement, bool) {
+    if (bool) {
+        domElement.classList.remove("d-none");
+        domElement.classList.add("d-block");
+    } else  {
+        domElement.classList.remove("d-block");
+        domElement.classList.add("d-none");
+    }
 }
 
 drawCanvas();

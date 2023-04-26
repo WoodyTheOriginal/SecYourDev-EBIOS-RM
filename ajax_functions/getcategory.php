@@ -11,17 +11,17 @@ $sql = "SELECT id, nom FROM $category";
 
 $stmt = $mysqli->query($sql);
 
-echo "<table>";
+echo "<table class='table'>";
 echo "<tr>";
-echo "<th>ID</th>";
-echo "<th>Nom</th>";
-echo "<th></th>";
+echo "<th scope='col'>ID</th>";
+echo "<th scope='col'>Nom</th>";
+echo "<th scope='col'></th>";
 echo "</tr>";
 while ($row = $stmt->fetch_assoc()) {
     echo "<tr>";
     echo "<td>" . $row['id'] . "</td>";
     echo "<td>" . $row['nom'] . "</td>";
-    echo "<td><button class='validerTable'>Valider</button></td>";
+    echo "<td><button class='validerTableContextMenu'>Valider</button></td>";
     echo "</tr>";
 }
 echo "</table>";
