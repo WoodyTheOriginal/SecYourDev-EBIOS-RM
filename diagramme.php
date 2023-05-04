@@ -19,7 +19,9 @@
         <span class="fs-4">SecYourDev</span>
         </a>
 
-        <button type="button" id="creerCarre" class="btn btn-secondary click">Créer un carré</button>
+        <button type="button" id="creerSource" class="btn btn-secondary click">Ajouter Source de risques</button>
+        <button type="button" id="creerPartie" class="btn btn-secondary click">Ajouter Partie prenante</button>
+        <button type="button" id="creerValeur" class="btn btn-secondary click">Ajouter Valeur métier</button>
         <button type="button" id="suppression" class="btn btn-secondary click">Supprimer élément</button>
         <button type="button" id="dessin" class="btn btn-secondary click">Dessiner des flèches</button>
         <button type="button" id="afficherChemins" class="btn btn-secondary click">Afficher chemins</button>
@@ -38,9 +40,11 @@
             <main class="content">
                 <div id="contextMenu" class="card mb-4 box-shadow d-none">
                     <div class="card-header bg-secondary">
-                    <div class="d-flex justify-content-center">
-                        <h3>Menu</h3>
+                        <div class="d-flex justify-content-center">
+                            <h3>Menu</h3>
+                        </div>
                     </div>
+                    <!--
                         <select id="selectCarre" name="typeCarre" class="form-select">
                         <option value="sources_de_risques" selected>Sources de risques</option>
                         <option value="partie_prenante">Parties Prenantes</option>
@@ -49,15 +53,15 @@
                         </div>
                         <div class="card-body">
                             <div class="d-flex justify-content-center align-self-center">
-                                <!--<div class="col" align="center"> <button class="btn btn-dark" id="valider">Valider</button></div>-->
                                 <div id="txtHint"></div>
                                 <div class="col" align="center"><button class="btn btn-dark" id="fermer">Fermer</button></div>
                             </div>
                         </div>
-                        <!--<button id="valider">Valider</button>
-                        <div id="txtHint">
-                        </div>
-                        <button id="fermer">Fermer</button>-->
+                    -->
+                    <div id='contextMenuContent'></div>
+                    <input class='d-none' id='inputContextMenu' type="text">
+                    <button class='btn btn-primary d-none' id='modifierContextMenu'>Modifier</button>
+                    <button class='btn btn-primary d-none' id='addElementToDB'>Ajouter un élément à la base de données</button>
                 </div>
                 
                 <div id="infoMenu" class="card mb-4 box-shadow d-none">
@@ -77,6 +81,7 @@
                     <h3>Dans la base de données</h3>
                     <div id="txtHint2">
                     </div>
+                    <div id="infoMenuSupp"></div>
                     <button id="fermer2">Fermer</button>
                 </div>
 

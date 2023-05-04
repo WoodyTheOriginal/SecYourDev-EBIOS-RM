@@ -24,6 +24,7 @@ var arrows = [];
 var currentArrow;
 var selectedSquare;
 var points = 0;
+var newSquare = null;
 
 //Importation des classes
 import { Square } from './modules/squares.js';
@@ -40,11 +41,14 @@ let fermer2 = document.getElementById('fermer2');
 let selectCarre = document.getElementById('selectCarre');
 let exportBtn = document.getElementById('export');
 let importBtn = document.getElementById('importButton');
-let creerCarre = document.getElementById('creerCarre');
+let creerSource = document.getElementById('creerSource');
+let creerPartie = document.getElementById('creerPartie');
+let creerValeur = document.getElementById('creerValeur');
 let fermer = document.getElementById('fermer');
 let afficherCheminsBouton = document.getElementById('afficherChemins');
 let fermerChemins = document.getElementById('fermerChemins');
 let contextMenu = document.getElementById('contextMenu');
+let contextMenuContent = document.getElementById('contextMenuContent');
 
 //Attribution des onclick aux boutons en vérifiant leur existance pour éviter les erreurs
 if (exists(canvas)) {
@@ -81,11 +85,26 @@ if (exists(exportBtn)) {
 if (exists(importBtn)) {
     importBtn.addEventListener('click', () => showDiagrams());
 }
-if (exists(creerCarre)) {
-    creerCarre.addEventListener('click', function() {
+if (exists(creerSource)) {
+    creerSource.addEventListener('click', function() {
         afficher(contextMenu, true);
+        squareChoice = "sources_de_risques";
+        showCategoryCarre("sources_de_risques");
     });
-//    creerCarre.addEventListener('change', (event) => showCategoryCarre(event.target.value));
+}
+if (exists(creerPartie)) {
+    creerPartie.addEventListener('click', function() {
+        afficher(contextMenu, true);
+        squareChoice = "partie_prenante";
+        showCategoryCarre("partie_prenante");
+    });
+}
+if (exists(creerValeur)) {
+    creerValeur.addEventListener('click', function() {
+        afficher(contextMenu, true);
+        squareChoice = "valeur_metier";
+        showCategoryCarre("valeur_metier");
+    });
 }
 if (exists(fermer)) {
     fermer.addEventListener('click', function() {
@@ -98,8 +117,6 @@ if (exists(afficherCheminsBouton)) {
 if (exists(fermerChemins)) {
     fermerChemins.addEventListener('click', () => exitMenu());
 }
-
-
 //Fonction qui vérifie l'existence du canvas
 if (exists(canvas)) {
     //Ajout de tous les event listeners sur le canvas
@@ -113,6 +130,7 @@ if (exists(canvas)) {
         //Tous les cas pour les carrés
         for (let i = 0; i < squares.length; i++) {
             //Si la souris est sur un carré
+            console.log(squares[i]);
             if (squares[i].containsPoint(mouseX, mouseY) === true){
                 /*Si on n'est pas en train de poser un carré, ou une flèche et pas en train de supprimer un objet
                 alors on attribue le carré en tant que carré et objet sélectionné*/
@@ -185,7 +203,6 @@ if (exists(canvas)) {
                     arrows[i].color = 'red';
                     pathTemp[0] = squares[0];
                     if (arrows[i].startSquare !== pathTemp[pathTemp.length - 1] ) {
-                        console.log("Chemin invalide");
                         pathTemp = [];
                         arrows.forEach(arrow => {
                             arrow.color = 'black';
@@ -242,12 +259,23 @@ if (exists(canvas)) {
         }
     
         if (drawingSquare){
-            var newSquare = new Square(squares.length , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
+            newSquare = new Square(squares.length , mouseX, mouseY, 50, 'black', maxInputChoice, maxOutputChoice);
             newSquare.nom = nom;
-            squares.push(newSquare);
-            reassignIds();
-            drawCanvas();
-            exitTool();
+            console.log("categorie : " + squareChoice);
+            newSquare.categorie = squareChoice;
+            squareChoice = null;
+            var exists = elementExists(newSquare);
+            console.log(exists);
+            if (exists == false) {
+                squares.push(newSquare);
+                newSquare = null;
+                drawCanvas();
+                exitTool();
+            } else {
+                //console.log(newSquare.nom);
+                //alert("Cet élément existe déjà");
+                exitTool();
+            }	
         }
     })
 
@@ -434,23 +462,24 @@ function dessinerCarre() {
     document.body.style.cursor = 'crosshair';
     afficher(contextMenu, false);
     drawingSquare = true;
-    console.log("IN ?");
-    squareChoice = document.getElementById('selectCarre').value;
     //Définition du nombre d'outputs et inputs en fonction du type de carré
     switch (squareChoice) {
         case 'sources_de_risques':
             maxInputChoice = 0;
             maxOutputChoice = -1;
+            //squareChoice = null;
             break;
 
         case 'partie_prenante':
             maxInputChoice = -1;
             maxOutputChoice = -1;
+            //squareChoice = null;
             break;
 
         case 'evenements_redoutes':
             maxInputChoice = -1;
             maxOutputChoice = 0;
+            //squareChoice = null;
             break;
 
         default:
@@ -502,10 +531,16 @@ function showChemin(id) {
     drawCanvas();
 }
 
+function deletePath(id) {
+    paths.splice(id, 1);
+    drawCanvas();
+}
+
 //Afficher le menu d'information permettant de modifier les informations d'un carré ou d'une flèche
 function showInfoMenu(object) {
     let infoMenu = document.getElementById("infoMenu");
     let infoMenuList = document.getElementById("infoMenuList");
+    let infoMenuSupp = document.getElementById("infoMenuSupp");
     let inputInfoData = document.getElementById("inputInfoData");
     let modifierData = document.getElementById("modifierData");
     let modifiedData = null;
@@ -515,6 +550,7 @@ function showInfoMenu(object) {
     infoMenuList.innerHTML += "<td>nom : " + object.nom + " <button class='modifierInfoMenu btn btn-primary click'>Modifier</button></td>";  
     infoMenuList.innerHTML += "<td>description : " + object.description + " <button class='modifierInfoMenu btn btn-primary click'>Modifier</button></td>";
     infoMenuList.innerHTML += "<td>vraisemblance : " + object.vraisemblance + " <button class='modifierInfoMenu btn btn-primary click'>Modifier</button></td>";
+    infoMenuSupp.innerHTML = "<button id='objectSuppBtn' class='btn btn-danger click'>Supprimer</button>";
     let infoMenuButtons = document.getElementsByClassName("modifierInfoMenu");
     for (const button of infoMenuButtons) {
         button.addEventListener('click', function(e) {
@@ -547,21 +583,25 @@ function showInfoMenu(object) {
         //A partir de la variable modifiedData on peut savoir quel champ on doit modifier
         switch (modifiedData) {
             case "id":
+                updateElement(selectedObject.categorie, modifiedData, inputInfoData.value, selectedObject.nom);
                 selectedObject.id = inputInfoData.value;
                 modifiedData = null;
                 break;
 
             case "nom":
+                updateElement(selectedObject.categorie, modifiedData, inputInfoData.value, selectedObject.nom);
                 selectedObject.nom = inputInfoData.value;
                 modifiedData = null;
                 break;
 
             case "description":
+                updateElement(selectedObject.categorie, modifiedData, inputInfoData.value, selectedObject.nom);
                 selectedObject.description = inputInfoData.value;
                 modifiedData = null;
                 break;
 
             case "vraisemblance":
+                updateElement(selectedObject.categorie, modifiedData, inputInfoData.value, selectedObject.nom);
                 selectedObject.vraisemblance = inputInfoData.value;
                 modifiedData = null;
                 break;
@@ -573,6 +613,26 @@ function showInfoMenu(object) {
         modifierData.style.display = "none";
         showInfoMenu(selectedObject);
         drawCanvas();
+    });
+    let infoMenuSuppButton = document.getElementById("objectSuppBtn");
+    infoMenuSuppButton.addEventListener('click', function(e) {
+        if (selectedObject instanceof Square) {
+            arrows.forEach(arrow => {
+                if (arrow.startSquare == selectedObject) {
+                    arrows.splice(arrows.indexOf(arrow), 1);
+                }
+            });
+            arrows.forEach(arrow => {
+                if (arrow.endSquare == selectedObject) {
+                    arrows.splice(arrows.indexOf(arrow), 1);
+                }
+            });
+            squares.splice(squares.indexOf(selectedObject), 1);
+        } else {
+            arrows.splice(arrows.indexOf(selectedObject), 1);
+        }
+        drawCanvas();
+        exitMenu();
     });
 }
 
@@ -590,36 +650,52 @@ function exitMenu() {
     if (exists(menuChemins)) {
         afficher(menuChemins, false);
     }
-    afficher(infoMenu, false);
+    if (exists(infoMenu)) {
+        afficher(infoMenu, false);
+    }
     selectedObject = null;
     selectedArrow = null;
 }
 
 //Fonction permettant de montrer les catégories de carrés dans la bdd (sources de risques, événements redoutés, parties prenantes)
 function showCategoryCarre(str) {
-    //console.log('change : ' + str);
     var xhttp;
+    let inputContextMenu = document.getElementById("inputContextMenu");
+    let modifierContextMenu = document.getElementById("modifierContextMenu");
+    let nomContextMenu = null;
     if (str == "") {
-      document.getElementById("txtHint").innerHTML = "";
+      document.getElementById("contextMenuContent").innerHTML = "";
       return;
     }
     xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        document.getElementById("txtHint").innerHTML = this.responseText;
+        document.getElementById("contextMenuContent").innerHTML = this.responseText;
         var validerBoutons = document.getElementsByClassName('validerTableContextMenu');
         for (const validerBouton of validerBoutons) {
             validerBouton.addEventListener('click', function() {
-                //console.log('index : ' + this.parentNode.parentNode.rowIndex);
                 var row = this.parentNode.parentNode;
                 var cells = row.getElementsByTagName('td');
                 var id = cells[0].innerHTML;                
                 nom = cells[1].innerHTML;
                 //var description = cells[2].innerHTML;
-                console.log('id : ' + id + ', nom : ' + nom);
                 dessinerCarre();
             });
         }
+        var modifierBoutons = document.getElementsByClassName('modifierTableContextMenu');
+        for (const modifierBouton of modifierBoutons) {
+            modifierBouton.addEventListener('click', function() {
+                afficher(inputContextMenu, true);
+                afficher(modifierContextMenu, true);
+                nomContextMenu = this.parentNode.parentNode.getElementsByTagName('td')[1].innerHTML;
+            });
+        }
+        modifierContextMenu.addEventListener('click', function() { 
+            afficher(inputContextMenu, false);
+            afficher(modifierContextMenu, false);
+            updateElement(squareChoice, "nom", inputContextMenu.value, nomContextMenu);
+            showCategoryCarre(squareChoice);
+        });
       }
     };
     xhttp.open("GET", "ajax_functions/getcategory.php?category="+str, true);
@@ -654,7 +730,6 @@ function showCategoryArrow() {
     xhttp.open("GET", "ajax_functions/getcategory.php?category=evenements_intermediaires", true);
     xhttp.send();
 }   
-
 
 //Export du diagramme en JSON dans la bdd
 function exportDiagram() {
@@ -782,6 +857,9 @@ function showPaths() {
         let tableCheminsCellButtonAfficher = tableCheminsCellButton.appendChild(document.createElement("button"));
         tableCheminsCellButtonAfficher.innerHTML = "Afficher";
         tableCheminsCellButtonAfficher.className = "afficherCheminTable btn btn-primary click";
+        let tableCheminsCellButtonSupprimer = tableCheminsCellButton.appendChild(document.createElement("button"));
+        tableCheminsCellButtonSupprimer.innerHTML = "Supprimer";
+        tableCheminsCellButtonSupprimer.className = "supprimerCheminTable btn btn-danger click";
     }
     let boutonsAfficherChemin = document.getElementsByClassName("afficherCheminTable");
     for (const bouton of boutonsAfficherChemin) {
@@ -792,6 +870,16 @@ function showPaths() {
             showChemin(id);
         });
     }   
+    let boutonsSupprimerChemin = document.getElementsByClassName("supprimerCheminTable");
+    for (const bouton of boutonsSupprimerChemin) {
+        bouton.addEventListener('click', function() {
+            let row = this.parentNode.parentNode;
+            let cells = row.getElementsByTagName('td');
+            let id = cells[0].innerHTML;
+            deletePath(id);
+            showPaths();
+        });
+    }
 }
 
 function afficher(domElement, bool) {
@@ -802,6 +890,35 @@ function afficher(domElement, bool) {
         domElement.classList.remove("d-block");
         domElement.classList.add("d-none");
     }
+}
+
+function elementExists(object) {
+    console.log(object.nom);
+    if (squares.length == 0) {
+        return false;
+    } else {
+        for (let i = 0; i < squares.length; i++) {
+            const square = squares[i];
+            console.log(square);
+            if (square.nom === object.nom) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+function updateElement(table, champs, data, nom) {
+    console.log("table : "+table+" champs : "+champs+" data : "+data+" nom : "+nom);
+    var xhttp;
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+        console.log(this.responseText);
+    }
+    };
+    xhttp.open("POST", "ajax_functions/modifier.php?table="+table+"&champs="+champs+"&data="+data+"&nom="+nom, true);
+    xhttp.send();
 }
 
 drawCanvas();

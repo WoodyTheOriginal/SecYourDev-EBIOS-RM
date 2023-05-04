@@ -20,8 +20,9 @@ echo "</tr>";
 while ($row = $stmt->fetch_assoc()) {
     echo "<tr>";
     echo "<td>" . $row['id'] . "</td>";
-    echo "<td>" . $row['nom'] . "</td>";
+    echo "<td id='nom'>" . $row['nom'] . "</td>";
     echo "<td><button class='validerTableContextMenu'>Valider</button></td>";
+    echo "<td><button class='modifierTableContextMenu'>Modifier</button></td>";
     echo "</tr>";
 }
 echo "</table>";
