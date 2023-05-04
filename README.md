@@ -1,7 +1,5 @@
 # Activ Esaip - Sec Your Dev
   
-Une petite description du projet
-
 ## Pré-requis
 
 - Wampserver64
