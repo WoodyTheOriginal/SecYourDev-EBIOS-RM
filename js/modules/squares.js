@@ -12,6 +12,7 @@ export function Square(id, x, y, size, color, maxInput, maxOutput) {
     this.nom = null;
     this.description = null;
     this.vraisemblance = null;
+    this.categorie = null;
 }
 
 // Define the draw method for the Square class
